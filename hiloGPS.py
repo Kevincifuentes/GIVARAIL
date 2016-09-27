@@ -19,7 +19,7 @@ def toDoubleLatLong(latlon, side):
         if ((side.upper() == "S") or (side.upper()=="W")):
             val *= -1
     except ValueError:
-        print("Can't calculate from {0} side {1}".format(latlon, side))
+        print("HILOGPS: Can't calculate from {0} side {1}".format(latlon, side))
         val = None
     return val
 
@@ -28,26 +28,26 @@ ser.baudrate = 9600
 ser.port = '/dev/ttyACM0'
 almacenamientoRedis = redis.StrictRedis(host='localhost', port=6379, db=0)
 
-def toFloat(self, value):
+def toFloat(value):
     val = None
-    if self._isNoneOrEmptry(value):
+    if value == None or value == '':
         return None
     try:
         val = float(value)
     except ValueError:
-        self._writeErr("Can't convert to float: {0}".format(value))
+        print("Can't convert to float: {0}".format(value))
         val = None
     return val
 
 def finalizar():
-    print("FIN")
+    print("HILOGPS: FIN")
 
 atexit.register(finalizar)
 
 ser.open()
 
 if not ser.isOpen():
-    print("Unable to open serial port!")
+    print("HILOGPS: Unable to open serial port!")
     raise SystemExit
 
 #Pone el GPS a la frecuencia de 2hz
@@ -75,6 +75,7 @@ while True:
         #No hacer nada
         print("Empieza")
     '''
+    #print(gps)
     if(gps.startswith('$GNGGA')):
         GGA = gps.split(',')
         if(GGA[2]!= '' and GGA[3]!= ''):
@@ -82,10 +83,9 @@ while True:
             longitud = GGA[4]+","+GGA[5]
             altitudMetros = toFloat(GGA[9])
             altitudGrados = toFloat(GGA[11])
-            gps = {'latitud':latitud, 'longitud':longitud, "altitudmetros" : altitudMetros, "altitudgrados" : altitudGrados}
-            posicion = json.dumps(gps)
-            almacenamientoRedis.set('posicion', posicion)
-        print(GGA)
+            gps2 = {'latitud':latitud, 'longitud':longitud, "altitudmetros" : altitudMetros, "altitudgrados" : altitudGrados}
+            push_element = almacenamientoRedis.lpush('cola_gps', json.dumps(gps2))
+        #print("HILOGPS:"+ str(GGA))
     if(gps.startswith('$GNZDA')):
         ZDA = gps.split(',')
         if(ZDA[1]!= ''):

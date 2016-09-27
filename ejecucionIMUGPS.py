@@ -6,7 +6,7 @@ import sys
 
 subprocess.Popen([sys.executable, 'hiloGPS.py', '--username', 'root'])
 subprocess.Popen([sys.executable, 'hiloIMU.py', '--username', 'root'])
-time.sleep(0.5)
+time.sleep(10)
 subprocess.Popen([sys.executable, 'filtradoGPSIMU.py', '--username', 'root'])
 '''
 execfile('hiloGPS.py')

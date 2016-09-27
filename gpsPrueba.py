@@ -5,6 +5,7 @@ import math
 import atexit
 import redis
 import json
+import time
 
 def toDoubleLatLong(latlon, side):
     val = None
@@ -24,19 +25,13 @@ def toDoubleLatLong(latlon, side):
     return val
 
 ser = serial.Serial()
-ser.baudrate = 9600
+ser.baudrate = 115200
 ser.port = '/dev/ttyACM0'
 almacenamientoRedis = redis.StrictRedis(host='localhost', port=6379, db=0)
 
-def toFloat(self, value):
+def toFloat( value):
     val = None
-    if self._isNoneOrEmptry(value):
-        return None
-    try:
-        val = float(value)
-    except ValueError:
-        self._writeErr("Can't convert to float: {0}".format(value))
-        val = None
+    val = float(value)
     return val
 
 def finalizar():
@@ -50,14 +45,20 @@ if not ser.isOpen():
     print("Unable to open serial port!")
     raise SystemExit
 
+#Pone el baudrate a 115200 (NECESARIO PARA RECIBIR TODOS LOS MENSAJES)
+ser.write("\xB5\x62\x06\x00\x14\x00\x01\x00\x00\x00\xD0\x08\x00\x00\x00\xC2")
+ser.write("\x01\x00\x03\x00\x03\x00\x00\x00\x00\x00\xBC\x5E")
+
 #Pone el GPS a la frecuencia de 2hz
 ser.write("\xB5\x62\x06\x08\x06\x00\xF4\x01\x01\x00\x01\x00\x0B\x77")
 ser.readline()
+global fichero
 fichero = open("/media/card/gpsPrueba.txt", "wb")
 primera = True
-global fichero
+
 while True:
     gps = ser.readline()
+    print(gps)
     fichero.write(gps)
     '''
     if (gps.startswith('$GNRMC')):
@@ -84,13 +85,13 @@ while True:
             longitud = GGA[4]+","+GGA[5]
             altitudMetros = toFloat(GGA[9])
             altitudGrados = toFloat(GGA[11])
-            gps = {'latitud':latitud, 'longitud':longitud, "altitudmetros" : altitudMetros, "altitudgrados" : altitudGrados}
-            posicion = json.dumps(gps)
-            almacenamientoRedis.set('posicion', posicion)
-        print(GGA)
+            gps2 = {'latitud':latitud, 'longitud':longitud, "altitudmetros" : altitudMetros, "altitudgrados" : altitudGrados}
+            push_element = almacenamientoRedis.lpush('cola_gps', json.dumps(gps2))
+        #print(GGA)
     #Mensaje que nos proporciona el tiempo y fecha
     if(gps.startswith('$GNZDA')):
         ZDA = gps.split(',')
+        #print(ZDA)
         if(ZDA[1]!= ''):
             UTC = ZDA[1]
             dia = ZDA[2]

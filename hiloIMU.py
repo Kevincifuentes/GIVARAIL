@@ -16,13 +16,13 @@ global ser
 try:
     ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1, writeTimeout=1)
 except IOError, e:
-    print("ERROR >>> AL ABRIR LA COMUNICACION CON LA IMU >>>> "+ str(e))
+    print("HILOIMU: ERROR >>> AL ABRIR LA COMUNICACION CON LA IMU >>>> "+ str(e))
     ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1,
                                         writeTimeout=1, rtscts=True,
                                         dsrdtr=True)
 
 def finalizar():
-    print("FIN")
+    print("HILOIMU: FIN")
 
 
 def leerValores(ser, mode=OutputMode.Calib, settings=OutputSettings.Coordinates_NED):
@@ -51,7 +51,7 @@ def envioBajoNivel(ser, mid, data=b''):
         while ((time.time()-start) < ser.timeout) and ser.read():
             pass
         ser.write(msg)
-        print("Envio realizado")
+        #print("HILOIMU: Envio realizado")
         #if self.verbose:
         #    print "MT: Write message id 0x%02X (%s) with %d data bytes: [%s]" %\
         #        (mid, getMIDName(mid), length,
@@ -76,7 +76,7 @@ def leerBajoNivel(ser):
             buf = esperando(ser, length+1)
             checksum = buf[-1]
             data = struct.unpack('!%dB' % length, buf[:-1])
-            print("LeerBajoNivel: id 0x%02X (%s)", mid, getMIDName(mid))
+            #print("HILOIMU: LeerBajoNivel: id 0x%02X (%s)", mid, getMIDName(mid))
             # check message integrity
             #if 0xFF & sum(data, 0xFF+mid+length+checksum):
             #    if self.verbose:
@@ -98,7 +98,7 @@ def esperando(ser, size=1):
             buf.extend(ser.read(size-len(buf)))
             if len(buf) == size:
                 return buf
-        print "waiting for %d bytes, got %d so far: [%s]" % \
+        print "HILOIMU: waiting for %d bytes, got %d so far: [%s]" % \
                     (size, len(buf), ' '.join('%02X' % v for v in buf))
         raise MTTimeoutException("waiting for message")
 
@@ -622,7 +622,7 @@ atexit.register(finalizar)
 #ser.open()
 
 if not ser.isOpen():
-    print("Unable to open serial port!")
+    print("HILOIMU: Unable to open serial port!")
     raise SystemExit
 
 envioBajoNivel(ser, MID.GoToConfig)
@@ -633,21 +633,31 @@ output_configuration = [(0x0000, 0)]
 data = b''.join(struct.pack('!HH', *output)
                         for output in output_configuration)
 envioBajoNivel(ser, MID.SetOutputConfiguration, data)
-print(leerBajoNivel(ser))
+#print(leerBajoNivel(ser))
 determinarModoOutput(ser, OutputMode.Calib)
 determinarConfiguracionOutput(ser, OutputSettings.Coordinates_NED)
 determinarPeriodo(ser, 1152)
 determinarSkipFactor(ser, 0)
-tiempo = json.loads(almacenamientoRedis.get("tiempo"))
+tiempoRedis = almacenamientoRedis.get("tiempo")
+tiempo = None
+if(tiempoRedis != ''):
+    tiempo = json.loads(tiempoRedis)
+else:
+    tiempo = ''
 
 if(tiempo != ''):
-    determinarTiempoUTC(ser, int(tiempo['UTC'][6:8])*100000, int(tiempo['ano']), tiempo['mes'], int(tiempo['dia']), int(tiempo['UTC'][:2]), int(tiempo['UTC'][2:4]), int(tiempo['UTC'][4:6]))
+    print(int(tiempo['ano']))
+    print(int(tiempo['mes']))
+    print(int(tiempo['dia']))
+    print(tiempo)
+    print(tiempo['UTC'][7:9]+" , "+tiempo['UTC'][:2]+" , "+tiempo['UTC'][2:4]+" , "+ tiempo['UTC'][4:6])
+    determinarTiempoUTC(ser, int(tiempo['UTC'][7:9])*1000, int(tiempo['ano']), int(tiempo['mes']), int(tiempo['dia']), int(tiempo['UTC'][:2]), int(tiempo['UTC'][2:4]), int(tiempo['UTC'][4:6]), 1)
 else:
     momento = datetime.utcnow()
-    determinarTiempoUTC(ser, momento.microsecond*1000, momento.year, momento.month, momento.day, momento.minute, momento.second, 1)
+    determinarTiempoUTC(ser, momento.microsecond*1000, momento.year, momento.month, momento.day, momento.hour, momento.minute, momento.second, 1)
 
-print(obtenerConfiguracion(ser))
-print("------------------------------------")
+#print(obtenerConfiguracion(ser))
+#print("HILOIMU: ------------------------------------")
 envioBajoNivel(ser, MID.GoToMeasurement)
 mid, data = leerBajoNivel(ser)
 
