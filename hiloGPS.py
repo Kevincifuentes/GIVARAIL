@@ -24,7 +24,7 @@ def toDoubleLatLong(latlon, side):
     return val
 
 ser = serial.Serial()
-ser.baudrate = 9600
+ser.baudrate = 115200
 ser.port = '/dev/ttyACM0'
 almacenamientoRedis = redis.StrictRedis(host='localhost', port=6379, db=0)
 
@@ -50,10 +50,13 @@ if not ser.isOpen():
     print("HILOGPS: Unable to open serial port!")
     raise SystemExit
 
+#Pone el baudrate a 115200 (NECESARIO PARA RECIBIR TODOS LOS MENSAJES)
+ser.write("\xB5\x62\x06\x00\x14\x00\x01\x00\x00\x00\xD0\x08\x00\x00\x00\xC2")
+ser.write("\x01\x00\x03\x00\x03\x00\x00\x00\x00\x00\xBC\x5E")
+
 #Pone el GPS a la frecuencia de 2hz
 ser.write("\xB5\x62\x06\x08\x06\x00\xF4\x01\x01\x00\x01\x00\x0B\x77")
 ser.readline()
-
 primera = True
 global fichero
 while True:
