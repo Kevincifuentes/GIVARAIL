@@ -5,7 +5,7 @@ import atexit
 import time
 import redis
 import json
-from numpy import dot, sum, tile, linalg, exp, log, pi
+from numpy import *
 from numpy.linalg import inv, det
 
 def kf_predict(X, P, A, Q, B, U):
@@ -42,7 +42,23 @@ def gauss_pdf(X, M, S):
 
 almacenamientoRedis = redis.StrictRedis(host='localhost', port=6379, db=0)
 
+#tiempo de movimiento en cada paso
+dt = 0.1
+# Initialization of state matrices
+X = array([[0.0], [0.0], [0.0] , [0.1], [0.1]])
+P = diag((0.01, 0.01, 0.01, 0.01, 0.01))
+A = array([[1, 0, dt , 0], [0, 1, 0, dt], [0, 0, 1, 0], [0, 0, 0,1]])
+Q = eye(X.shape()[0])
+B = eye(X.shape()[0])
+U = zeros((X.shape()[0],1))
+# Measurement matrices
+Y = array([[X[0,0] + abs(randn(1)[0])], [X[1,0] +\
+ abs(randn(1)[0])]], )
+H = array([[1, 0, 0, 0], [0, 1, 0, 0]])
+R = eye(Y.shape()[0])
+
 while(True):
+
 
     valoresIMU = almacenamientoRedis.rpop('cola_imu')
     posicionIMU = None
@@ -55,6 +71,7 @@ while(True):
             posicionIMU = json.loads(valoresIMU)
             #>>>>>>>>>>>>>>>>>KALMAN con IMU
             print("Solo IMU:")
+            (X, P) = kf_predict(X, P, A, Q, B, U)
             #print("FILTRADO:"+str(posicionIMU))
         else:
             print("ERROR: No hay valores ni del GPS ni de la IMU.")
@@ -65,6 +82,8 @@ while(True):
             exit(0)
         posicionIMU = json.loads(valoresIMU)
         print("Los dos:")
+        (X, P) = kf_predict(X, P, A, Q, B, U)
+        (X, P, K, IM, IS, LH) = kf_update(X, P, Y, H, R)
         #>>>>>>>>>>>>>>>>>KALMAN con IMU y GPS
         #print("FILTRADO:"+str(posicionGPS))
         #print("FILTRADO:"+str(posicionIMU))
