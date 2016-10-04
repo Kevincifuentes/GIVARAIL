@@ -51,16 +51,12 @@ ser.write("\x01\x00\x03\x00\x03\x00\x00\x00\x00\x00\xBC\x5E")
 #Pone el GPS a la frecuencia de 2hz
 ser.write("\xB5\x62\x06\x08\x06\x00\xF4\x01\x01\x00\x01\x00\x0B\x77")
 ser.readline()
-global fichero
-fichero = open("/media/card/gpsPrueba.txt", "wb")
 primera = True
 
-stomp = Client(host='localhost', port=61613)
+stomp = Client(host='10.45.1.162', port=61613)
 stomp.connect()
 while True:
     gps = ser.readline()
-    print(gps)
-    fichero.write(gps)
     '''
     if (gps.startswith('$GNRMC')):
         if(primera == True):
