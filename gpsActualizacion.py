@@ -53,7 +53,7 @@ ser.write("\xB5\x62\x06\x08\x06\x00\xF4\x01\x01\x00\x01\x00\x0B\x77")
 ser.readline()
 primera = True
 
-stomp = Client(host='10.45.1.162', port=61613)
+stomp = Client(host='dev.mobility.deustotech.eu', port=61613)
 stomp.connect()
 while True:
     gps = ser.readline()
@@ -83,7 +83,7 @@ while True:
             altitudMetros = toFloat(GGA[9])
             altitudGrados = toFloat(GGA[11])
             gps2 = {'latitud':latitud, 'longitud':longitud}
-            stomp.put(json.dumps(gps2), destination="/queue/jms.topic.test", conf={"type":"posicion"})
+            stomp.put(json.dumps(gps2), destination="/topic/jms.topic.test", conf={"type":"posicion"})
     '''
     else:
         fichero.write(gps)
