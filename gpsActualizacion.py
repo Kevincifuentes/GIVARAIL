@@ -82,7 +82,7 @@ while True:
             longitud = toDoubleLatLong(GGA[4],GGA[5])
             altitudMetros = toFloat(GGA[9])
             altitudGrados = toFloat(GGA[11])
-            gps2 = {'latitud':latitud, 'longitud':longitud}
+            gps2 = {'idtren': 'tren1', 'latitud':latitud, 'longitud':longitud}
             stomp.put(json.dumps(gps2), destination="/topic/jms.topic.test", conf={"type":"posicion"})
     '''
     else:
