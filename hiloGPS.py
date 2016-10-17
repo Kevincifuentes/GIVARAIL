@@ -82,8 +82,8 @@ while True:
     if(gps.startswith('$GNGGA')):
         GGA = gps.split(',')
         if(GGA[2]!= '' and GGA[3]!= ''):
-            latitud = GGA[2]+","+GGA[3]
-            longitud = GGA[4]+","+GGA[5]
+            latitud = GGA[2]
+            longitud = GGA[4]
             altitudMetros = toFloat(GGA[9])
             altitudGrados = toFloat(GGA[11])
             gps2 = {'latitud':latitud, 'longitud':longitud, "altitudmetros" : altitudMetros, "altitudgrados" : altitudGrados}
