@@ -24,6 +24,9 @@ except IOError, e:
 
 def finalizar():
     print("HILOIMU: FIN")
+    envioBajoNivel(ser, MID.Reset)
+    print(leerBajoNivel(ser))
+    ser.close()
 
 
 def leerValores(ser, mode=OutputMode.Calib, settings=OutputSettings.Coordinates_NED):
@@ -35,8 +38,10 @@ def leerValores(ser, mode=OutputMode.Calib, settings=OutputSettings.Coordinates_
         elif mid == MID.MTData2:
             return parse_MTData2(data)
         else:
-            raise MTException("unknown data message: mid=0x%02X (%s)." %
-                              (mid, getMIDName(mid)))
+            #raise MTException("unknown data message: mid=0x%02X (%s)." %  (mid, getMIDName(mid)))
+            print("error")
+            envioBajoNivel(ser, MID.GoToMeasurement)
+            print(leerBajoNivel(ser))
 
 def envioBajoNivel(ser, mid, data=b''):
         """Low-level message sending function."""
@@ -686,8 +691,9 @@ if not ser.isOpen():
     print("HILOIMU: Unable to open serial port!")
     raise SystemExit
 
+
 envioBajoNivel(ser, MID.GoToConfig)
-mid, data = leerBajoNivel(ser)
+print(leerBajoNivel(ser))
 
 almacenamientoRedis = redis.StrictRedis(host='localhost', port=6379, db=0)
 output_configuration = get_output_config("oe100fe,bp50,aa100fe,wr100fe,mf100fe")
@@ -735,16 +741,16 @@ while True:
     fichero.close()
 '''
 envioBajoNivel(ser, MID.GoToMeasurement)
-mid, data = leerBajoNivel(ser)
-mid, data = leerBajoNivel(ser)
+print(leerBajoNivel(ser))
 
 while True:
     info =leerValores(ser)
-    if('Pressure' in info):
-        #print(info)
-        info['Barometro'] = info['Pressure']['Pressure']
-        push_element = almacenamientoRedis.lpush('cola_imu', json.dumps(info))
-    else:
-        info['Barometro'] = 0
-        push_element = almacenamientoRedis.lpush('cola_imu', json.dumps(info))
+    if(info != None):
+        if('Pressure' in info):
+            print(info)
+            info['Barometro'] = info['Pressure']['Pressure']
+            push_element = almacenamientoRedis.lpush('cola_imu', json.dumps(info))
+        else:
+            info['Barometro'] = 0
+            push_element = almacenamientoRedis.lpush('cola_imu', json.dumps(info))
 

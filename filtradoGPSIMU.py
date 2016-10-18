@@ -74,11 +74,11 @@ while(True):
             #print("Solo IMU:")
             #print(resultado)
         else:
-            print("ERROR: No hay valores ni del GPS ni de la IMU.")
+            error = 1#"ERROR: No hay valores ni del GPS ni de la IMU.")
     else:
         posicionGPS = json.loads(posicion)
         if(valoresIMU == None):
-            print("ERROR: No hay valores de la IMU.")
+            error = 2#"ERROR: No hay valores de la IMU.")
         else:
             posicionIMU = json.loads(valoresIMU)
             aceleracionX = str(posicionIMU["Acceleration"]["accX"])
