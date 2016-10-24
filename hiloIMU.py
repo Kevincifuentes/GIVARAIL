@@ -747,7 +747,7 @@ while True:
     info =leerValores(ser)
     if(info != None):
         if('Pressure' in info):
-            print(info)
+            #print(info)
             info['Barometro'] = info['Pressure']['Pressure']
             push_element = almacenamientoRedis.lpush('cola_imu', json.dumps(info))
         else:

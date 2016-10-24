@@ -59,17 +59,20 @@ while(True):
             magnetometroX = str(posicionIMU["Magnetic"]["magX"])
             magnetometroY = str(posicionIMU["Magnetic"]["magY"])
             magnetometroZ = str(posicionIMU["Magnetic"]["magZ"])
+            yaw = str(posicionIMU["Orientation Data"]["Yaw"])
+            pitch = str(posicionIMU["Orientation Data"]["Pitch"])
+            roll = str(posicionIMU["Orientation Data"]["Roll"])
             barometro = str(posicionIMU["Barometro"])
             resultado = "";
             if contador == 100:
                 contador = 0
                 print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                 timeStamp = datetime.datetime.now().strftime("%d-%m-%y %H:%M:%S.%f")
-                resultado ="0,0,0,"+aceleracionX+","+aceleracionY+","+aceleracionZ+","+giroscopioX+","+giroscopioY+","+giroscopioZ+","+magnetometroX+","+magnetometroY+","+magnetometroZ+","+barometro+","+timeStamp+";\n"
+                resultado ="0,0,0,"+aceleracionX+","+aceleracionY+","+aceleracionZ+","+giroscopioX+","+giroscopioY+","+giroscopioZ+","+magnetometroX+","+magnetometroY+","+magnetometroZ+","+yaw+","+pitch+","+roll+","+barometro+","+timeStamp+";\n"
                 fichero.write(resultado)
             else:
                 contador = contador +1
-                resultado = "0,0,0,"+aceleracionX+","+aceleracionY+","+aceleracionZ+","+giroscopioX+","+giroscopioY+","+giroscopioZ+","+magnetometroX+","+magnetometroY+","+magnetometroZ+","+barometro+",0;\n"
+                resultado = "0,0,0,"+aceleracionX+","+aceleracionY+","+aceleracionZ+","+giroscopioX+","+giroscopioY+","+giroscopioZ+","+magnetometroX+","+magnetometroY+","+magnetometroZ+","+yaw+","+pitch+","+roll+","+barometro+",0;\n"
                 fichero.write(resultado)
             #print("Solo IMU:")
             #print(resultado)
@@ -90,6 +93,9 @@ while(True):
             magnetometroX = str(posicionIMU["Magnetic"]["magX"])
             magnetometroY = str(posicionIMU["Magnetic"]["magY"])
             magnetometroZ = str(posicionIMU["Magnetic"]["magZ"])
+            yaw = str(posicionIMU["Orientation Data"]["Yaw"])
+            pitch = str(posicionIMU["Orientation Data"]["Pitch"])
+            roll = str(posicionIMU["Orientation Data"]["Roll"])
             barometro = str(posicionIMU["Barometro"])
             longitud = str(posicionGPS["longitud"])
             latitud = str(posicionGPS["latitud"])
@@ -100,11 +106,11 @@ while(True):
                 print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                 contador = 0
                 timeStamp = datetime.datetime.now().strftime("%d-%m-%y %H:%M:%S.%f")
-                resultado =latitud+","+longitud+","+altitud+","+aceleracionX+","+aceleracionY+","+aceleracionZ+","+giroscopioX+","+giroscopioY+","+giroscopioZ+","+magnetometroX+","+magnetometroY+","+magnetometroZ+","+barometro+","+timeStamp+";\n"
+                resultado =latitud+","+longitud+","+altitud+","+aceleracionX+","+aceleracionY+","+aceleracionZ+","+giroscopioX+","+giroscopioY+","+giroscopioZ+","+magnetometroX+","+magnetometroY+","+magnetometroZ+","+yaw+","+pitch+","+roll+","+barometro+","+timeStamp+";\n"
                 fichero.write(resultado)
             else:
                 contador = contador +1
-                resultado = latitud+","+longitud+","+altitud+","+aceleracionX+","+aceleracionY+","+aceleracionZ+","+giroscopioX+","+giroscopioY+","+giroscopioZ+","+magnetometroX+","+magnetometroY+","+magnetometroZ+","+barometro+",0;\n"
+                resultado = latitud+","+longitud+","+altitud+","+aceleracionX+","+aceleracionY+","+aceleracionZ+","+giroscopioX+","+giroscopioY+","+giroscopioZ+","+magnetometroX+","+magnetometroY+","+magnetometroZ+","+yaw+","+pitch+","+roll+","+barometro+",0;\n"
                 fichero.write(resultado)
             #print("Los dos:")
             #print(resultado)
