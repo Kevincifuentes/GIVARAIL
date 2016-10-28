@@ -101,7 +101,7 @@ while(True):
             latitud = str(posicionGPS["latitud"])
             altitud = str(posicionGPS["altitudmetros"])
             procesoExtra()
-            resultado = "";
+            resultado = ""
             if contador == 100:
                 print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
                 contador = 0
