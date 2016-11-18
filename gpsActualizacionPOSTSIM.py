@@ -83,6 +83,7 @@ print("ip="+ format(inet.ip))
 
 while True:
     gps = ser.readline()
+    #print(gps)
     '''
     if (gps.startswith('$GNRMC')):
         if(primera == True):
