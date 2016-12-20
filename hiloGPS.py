@@ -4,6 +4,7 @@ import serial
 import math
 import atexit
 import redis
+import logging
 import json
 
 def toDoubleLatLong(latlon, side):
@@ -23,6 +24,7 @@ def toDoubleLatLong(latlon, side):
         val = None
     return val
 
+logging.basicConfig(filename='logs/hiloGPS.log',format='HiloGPS - %(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 ser = serial.Serial()
 ser.baudrate = 115200
 ser.port = '/dev/ttyACM0'
@@ -40,7 +42,8 @@ def toFloat(value):
     return val
 
 def finalizar():
-    print("HILOGPS: FIN")
+    print("Fin del HiloGPS")
+    logging.info('HILOGPS terminado.')
 
 atexit.register(finalizar)
 
@@ -48,6 +51,7 @@ ser.open()
 
 if not ser.isOpen():
     print("HILOGPS: Unable to open serial port!")
+    logging.error("No es posible abrir el serial para el GPS.")
     raise SystemExit
 
 #Pone el baudrate a 115200 (NECESARIO PARA RECIBIR TODOS LOS MENSAJES)
@@ -60,7 +64,13 @@ ser.readline()
 primera = True
 global fichero
 while True:
-    gps = ser.readline()
+    try:
+        gps = ser.readline()
+    except KeyboardInterrupt:
+        print("Lectura del GPS interrumpida.")
+        logging.error("Lectura del GPS interrumpida. Mensaje: "+ KeyboardInterrupt.message)
+        exit(0)
+
     '''
     if (gps.startswith('$GNRMC')):
         if(primera == True):
@@ -78,7 +88,7 @@ while True:
         #No hacer nada
         print("Empieza")
     '''
-    #print(gps)
+
     if(gps.startswith('$GNGGA')):
         GGA = gps.split(',')
         if(GGA[2]!= '' and GGA[3]!= ''):
@@ -100,6 +110,7 @@ while True:
             almacenamientoRedis.set('tiempo', json.dumps(tiempo))
         else:
             almacenamientoRedis.set('tiempo', '')
+    logging.info('Correcto enviado GPS')
     '''
     else:
         fichero.write(gps)

@@ -5,6 +5,7 @@ import serial
 import re
 import json
 import redis
+import logging
 import time
 import struct
 import atexit
@@ -14,16 +15,19 @@ from mtdef import MID, OutputMode, OutputSettings, MTException, Baudrates, \
     MTTimeoutException
 
 global ser
+logging.basicConfig(filename='logs/hiloIMU.log',format='HiloIMU - %(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 try:
     ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1, writeTimeout=1)
 except IOError, e:
-    print("HILOIMU: ERROR >>> AL ABRIR LA COMUNICACION CON LA IMU >>>> "+ str(e))
+    #print("HILOIMU: ERROR >>> AL ABRIR LA COMUNICACION CON LA IMU >>>> "+ str(e))
+    print("Intentando por segunda vez...")
     ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1,
                                         writeTimeout=1, rtscts=True,
                                         dsrdtr=True)
 
 def finalizar():
-    print("HILOIMU: FIN")
+    print("Fin del HiloIMU")
+    logging.info('HILOIMU terminado.')
     envioBajoNivel(ser, MID.Reset)
     print(leerBajoNivel(ser))
     ser.close()
@@ -685,13 +689,12 @@ def pedirIDDispositivo(ser):
 
 atexit.register(finalizar)
 
-#ser.open()
-
 if not ser.isOpen():
     print("HILOIMU: Unable to open serial port!")
+    logging.error("No es posible abrir el serial para la IMU.")
     raise SystemExit
 
-
+print("Inicializando IMU...")
 envioBajoNivel(ser, MID.GoToConfig)
 print(leerBajoNivel(ser))
 
@@ -700,7 +703,7 @@ output_configuration = get_output_config("oe100fe,bp50,aa100fe,wr100fe,mf100fe")
 data = b''.join(struct.pack('!HH', *output)
                         for output in output_configuration)
 envioBajoNivel(ser, MID.SetOutputConfiguration, data)
-print(leerBajoNivel(ser))
+leerBajoNivel(ser)
 
 '''
 determinarModoOutput(ser, OutputMode.Calib)
@@ -740,17 +743,40 @@ while True:
     fichero.write(str(info))
     fichero.close()
 '''
+obtenerConfiguracion(ser)
+
 envioBajoNivel(ser, MID.GoToMeasurement)
-print(leerBajoNivel(ser))
+leerBajoNivel(ser)
+leerBajoNivel(ser)
 
 while True:
-    info =leerValores(ser)
-    if(info != None):
-        if('Pressure' in info):
-            #print(info)
-            info['Barometro'] = info['Pressure']['Pressure']
-            push_element = almacenamientoRedis.lpush('cola_imu', json.dumps(info))
-        else:
-            info['Barometro'] = 0
-            push_element = almacenamientoRedis.lpush('cola_imu', json.dumps(info))
+    try:
+        try:
+            info =leerValores(ser)
+        except KeyboardInterrupt:
+            print("Lectura de la IMU interrumpida.")
+            exit(0)
+    except Exception:
+        print("Error en el hiloIMU.")
+        logging.error("Error en la IMU. Mensaje: "+Exception.message)
 
+    #print("IMU:")
+    #print(info)
+    try:
+        if(info != None):
+            if ("Orientation Data" in info) and ("Acceleration" in info):
+                if('Pressure' in info):
+                    #print(info)
+                    info['Barometro'] = info['Pressure']['Pressure']
+                    push_element = almacenamientoRedis.lpush('cola_imu', json.dumps(info))
+                else:
+                    info['Barometro'] = 0
+                    push_element = almacenamientoRedis.lpush('cola_imu', json.dumps(info))
+                logging.info('Correcto enviado IMU')
+            else:
+                logging.error("La IMU no esta devolviendo Orientation Data o Acceleration")
+        else:
+            logging.error("La IMU esta devolviendo NONE.")
+    except Exception:
+        print("Error en el hiloIMU.")
+        logging.error("Error en la IMU. Mensaje: "+Exception.message)

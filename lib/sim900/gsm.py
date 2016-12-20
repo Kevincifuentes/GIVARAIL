@@ -273,6 +273,7 @@ class SimGsmSerialPortHandler(AminisLastErrorHolderWithLogging):
             while True:
                 #checking for timeout
                 if timeDelta(start) >= maxWaitTime:
+                    print(">>>>>>>>>>>>>>>>>>>>>>>>>>Error por Timeout al leer de serial")
                     return None
 
                 receivedBytesQty = 0
@@ -301,9 +302,11 @@ class SimGsmSerialPortHandler(AminisLastErrorHolderWithLogging):
             return None
 
         except Exception as e:
+            print("Exception:" +e.message)
             self.setError(e)
             return None
         except:
+            print("Reading error:")
             self.setError("reading error...")
             return None
 
@@ -327,7 +330,6 @@ class SimGsmSerialPortHandler(AminisLastErrorHolderWithLogging):
             #reading string
             #TODO: need to fix timeout (substract already spent time interval)
             line = self.readLn(maxWaitTime, codepage)
-
             #removing garbage symbols
             if line is not None:
                 line = str(line).strip()
@@ -503,7 +505,6 @@ class SimGsmSerialPortHandler(AminisLastErrorHolderWithLogging):
                 #if we have some strings let's parse it
                 if len(strings) > 0:
                     lastString = SimGsm.getLastNonEmptyString(strings[:])
-
                     if lastString in possibleResults:
                         self.lastResult = lastString
                         return SimGsm.removeEndResult(strings[:], lastString)
@@ -529,6 +530,7 @@ class SimGsmSerialPortHandler(AminisLastErrorHolderWithLogging):
         self.logger.debug("executing command '{0}'".format(commandText))
 
         ret = self.commandAndStdResult(commandText, timeout, ["OK", "ERROR"])
+        print(self.lastResult)
         if (ret is None) or (self.lastResult != "OK"):
             return False
 

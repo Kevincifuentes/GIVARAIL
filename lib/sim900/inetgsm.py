@@ -431,7 +431,7 @@ class SimInetGSM(SimGsm):
             [ "AT+HTTPINIT",                                                    2000 ],
             [ "AT+HTTPPARA=\"CID\",\"{0}\"".format(bearerChannel),              1000 ],
             [ "AT+HTTPPARA=\"URL\",\"{0}:{1}{2}\"".format(server, port, path),  500  ],
-            [ "AT+HTTPPARA=\"CONTENT\",\"application/x-www-form-urlencoded\"",  500  ],
+            [ "AT+HTTPPARA=\"CONTENT\",\"text/html\"",  500  ],
             [ "AT+HTTPPARA=\"UA\",\"{0}\"".format(self.userAgent),              500  ],
             [ "AT+HTTPPARA=\"REDIR\",\"1\"",                                    500  ],
             [ "AT+HTTPPARA=\"TIMEOUT\",\"45\"",                                 500  ]
@@ -440,7 +440,7 @@ class SimInetGSM(SimGsm):
         #executing commands sequence
         if not self.execSimpleCommandsList(simpleCommands):
             print("1")
-            return False
+            return 1
 
 
         #uploading data
@@ -454,7 +454,7 @@ class SimInetGSM(SimGsm):
         if (ret is None) or (self.lastResult != "DOWNLOAD"):
             self.setError("{0}: can't upload HTTP POST data".format(inspect.stack()[0][3]))
             print("2")
-            return False
+            return 2
 
         self.simpleWriteLn(parameters)
 
@@ -462,28 +462,28 @@ class SimInetGSM(SimGsm):
         if (dataLine is None) or (dataLine != "OK"):
             self.setError("{0}: can't upload HTTP POST data".format(inspect.stack()[0][3]))
             print("3")
-            return
+            return 3
 
         self.logger.debug("actually making request")
 
         #TODO: check CPU utilization
         if not self.execSimpleOkCommand("AT+HTTPACTION=1", 15000):
             print("4")
-            return False
+            return 4
         ''''''
         #reading HTTP request result
-        dataLine = self.readDataLine(15000)
-
+        dataLine = self.readDataLine(12000)
+        #print(dataLine)
         if dataLine is None:
             self.setError("{0}: empty HTTP request result string".format(inspect.stack()[0][3]))
             print("5")
-            return False
+            return 5
 
         #parsing string like this "+HTTPACTION:0,200,15"
         httpResult = self.__parseHttpResult(dataLine, bearerChannel)
         if httpResult is None:
             print("6")
-            return False
+            return 6
 
         #assigning HTTP result code
         self.__httpResult = httpResult[0]
@@ -510,12 +510,12 @@ class SimInetGSM(SimGsm):
 
         if not self.__readHttpResponse(0, responseLength):
             print("7")
-            return False
+            return 7
 
         return True
 
 
-        # self.disconnectTcp()
+        #self.disconnectTcp()
         #
         # return True
 

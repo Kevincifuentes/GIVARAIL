@@ -73,7 +73,7 @@ if d is None:
 inet = SimInetGSM(port, logger)
 
 logger.info("attaching GPRS")
-if not inet.attachGPRS("telefonica.es", "", "", 1):
+if not inet.attachGPRS("telefonica.es", "telefonica", "telefonica", 1):
     print("Error al abrir internet en el modulo SIM.")
     logger.error("Error al abrir internet en el modulo SIM.")
     exit(0)
@@ -109,10 +109,11 @@ while True:
             longitud = toDoubleLatLong(GGA[4],GGA[5])
             altitudMetros = toFloat(GGA[9])
             altitudGrados = toFloat(GGA[11])
-            gps2 = {'idtren': 'tren1', 'latitud':latitud, 'longitud':longitud}
+            gps2 = {'idtren': 'prueba1', 'latitud':latitud, 'longitud':longitud}
             #r = requests.post("http://dev.mobility.deustotech.eu:8000/posicion", data=json.dumps(gps2))
-            if not inet.httpPOST("dev.mobility.deustotech.eu", 8000,"/posicion",json.dumps(gps2)):
-                print("[ERROR]: No se ha podido subir los datos")
+            valor = inet.httpPOST("130.206.138.15", 8000,"/posicion",json.dumps(gps2))
+            if valor != True:
+                print("[ERROR]: No se han podido subir los datos. Codigo "+ str(valor))
             else:
                 print("Correcto")
 
