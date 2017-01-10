@@ -3,6 +3,7 @@
 from datetime import datetime
 import serial
 import re
+import sys
 import json
 import redis
 import logging
@@ -15,7 +16,9 @@ from mtdef import MID, OutputMode, OutputSettings, MTException, Baudrates, \
     MTTimeoutException
 
 global ser
-logging.basicConfig(filename='logs/hiloIMU.log',format='HiloIMU - %(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+#logging.basicConfig(filename='logs/hiloIMU.log',format='HiloIMU - %(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+logging.basicConfig(filename='/media/card/logs/hiloIMU.log',format='HiloIMU - %(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+
 try:
     ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1, writeTimeout=1)
 except IOError, e:
@@ -756,9 +759,9 @@ while True:
         except KeyboardInterrupt:
             print("Lectura de la IMU interrumpida.")
             exit(0)
-    except Exception:
+    except:
         print("Error en el hiloIMU.")
-        logging.error("Error en la IMU. Mensaje: "+Exception.message)
+        logging.error("Error en la IMU. Mensaje: ", sys.exc_info()[0])
 
     #print("IMU:")
     #print(info)
@@ -777,6 +780,6 @@ while True:
                 logging.error("La IMU no esta devolviendo Orientation Data o Acceleration")
         else:
             logging.error("La IMU esta devolviendo NONE.")
-    except Exception:
+    except:
         print("Error en el hiloIMU.")
-        logging.error("Error en la IMU. Mensaje: "+Exception.message)
+        logging.error("Error en la IMU. Mensaje: ", sys.exc_info()[0])

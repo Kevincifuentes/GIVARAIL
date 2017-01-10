@@ -36,7 +36,8 @@ def cleanup():
      subprocess.Popen([sys.executable, 'limpiarColaGPS.py', '--username', 'root'])
      subprocess.Popen([sys.executable, 'limpiarColaIMU.py', '--username', 'root'])
 
-logging.basicConfig(filename='logs/logFiltradoGPSIMU.log',format='FiltradoGPSIMU - %(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+#logging.basicConfig(filename='logs/logFiltradoGPSIMU.log',format='FiltradoGPSIMU - %(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+logging.basicConfig(filename='/media/card/logs/logFiltradoGPSIMU.log',format='FiltradoGPSIMU - %(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 hiloGPS = subprocess.Popen([sys.executable, 'hiloGPS.py', '--username', 'root'])
 hiloIMU = subprocess.Popen([sys.executable, 'hiloIMU.py', '--username', 'root'])
 time.sleep(8)
@@ -107,7 +108,7 @@ try:
                 #"ERROR: No hay valores ni del GPS ni de la IMU.")
                 #print("Error no hay valores ni de la IMU, ni del GPS")
                 if(error != 1):
-                    logging.error("Error no hay valores ni de la IMU, ni del GPS")
+                    #logging.error("Error no hay valores ni de la IMU, ni del GPS")
                     error = 1
 
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import serial
+import sys
 import math
 import atexit
 import redis
@@ -24,7 +25,9 @@ def toDoubleLatLong(latlon, side):
         val = None
     return val
 
-logging.basicConfig(filename='logs/hiloGPS.log',format='HiloGPS - %(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+#logging.basicConfig(filename='logs/hiloGPS.log',format='HiloGPS - %(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+logging.basicConfig(filename='/media/card/logs/hiloGPS.log',format='HiloGPS - %(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+
 ser = serial.Serial()
 ser.baudrate = 115200
 ser.port = '/dev/ttyACM0'
@@ -70,6 +73,8 @@ while True:
         print("Lectura del GPS interrumpida.")
         logging.error("Lectura del GPS interrumpida. Mensaje: "+ KeyboardInterrupt.message)
         exit(0)
+    except:
+        logging.error("Error en el GPS. Mensaje: ", sys.exc_info()[0])
 
     '''
     if (gps.startswith('$GNRMC')):
