@@ -23,6 +23,12 @@ def procesoExtra():
         i = i+1
 
 def cleanup():
+     #Para eliminar la ultima linea, dado que suele estar medio-escrita
+     fichero.close()
+     f = open(nombreFichero, "r+")
+     f.seek(-len(os.linesep), os.SEEK_END)
+     f.write("")
+     f.close()
      print '--------------------------------Limpiando----------------------------------------'
      try:
          os.killpg(PIDGPS, signal.SIGINT)
@@ -41,8 +47,8 @@ logging.basicConfig(filename='/media/card/logs/logFiltradoGPSIMU.log',format='Fi
 hiloGPS = subprocess.Popen([sys.executable, 'hiloGPS.py', '--username', 'root'])
 hiloIMU = subprocess.Popen([sys.executable, 'hiloIMU.py', '--username', 'root'])
 time.sleep(8)
-global PIDGPS
-global PIDIMU
+
+#Variables
 PIDGPS = os.getpgid(hiloGPS.pid)
 PIDIMU = os.getpgid(hiloIMU.pid)
 
@@ -53,7 +59,9 @@ atexit.register(cleanup)
 
 almacenamientoRedis = redis.StrictRedis(host='localhost', port=6379, db=0)
 tiempoActual = datetime.datetime.now().strftime("%d%m%y_%H%M%S%f")
+global nombreFichero
 nombreFichero = '/media/card/valoresPrueba_'+ tiempoActual +'.txt'
+global fichero
 fichero = open(nombreFichero, "wb")
 contador = 0;
 error = 0
@@ -71,7 +79,7 @@ try:
                 #>>>>>>>>>>>>>>>>>KALMAN con IMU
                 procesoExtra()
                 try:
-                    #gnssN, gnssE, gnssU, accX, accY, accZ, gyrX, gyrY, gyrZ, magX, magY, magZ, bar, Fecha;
+                    #gnssN, gnssE, gnssU, accX, accY, accZ, gyrX, gyrY, gyrZ, magX, magY, magZ, bar, hdop, vdop, pdop, Fecha;
                     aceleracionX = str(posicionIMU["Acceleration"]["accX"])
                     aceleracionY = str(posicionIMU["Acceleration"]["accY"])
                     aceleracionZ = str(posicionIMU["Acceleration"]["accZ"])
@@ -93,15 +101,15 @@ try:
                 if contador == 100:
                     contador = 0
                     timeStamp = datetime.datetime.now().strftime("%d-%m-%y %H:%M:%S.%f")
-                    resultado ="0,0,0,"+aceleracionX+","+aceleracionY+","+aceleracionZ+","+giroscopioX+","+giroscopioY+","+giroscopioZ+","+magnetometroX+","+magnetometroY+","+magnetometroZ+","+yaw+","+pitch+","+roll+","+barometro+","+timeStamp+";\n"
+                    resultado ="0,0,0,"+aceleracionX+","+aceleracionY+","+aceleracionZ+","+giroscopioX+","+giroscopioY+","+giroscopioZ+","+magnetometroX+","+magnetometroY+","+magnetometroZ+","+yaw+","+pitch+","+roll+","+barometro+",0,0,0,"+timeStamp+";\n"
                     fichero.write(resultado)
                 else:
                     contador = contador +1
-                    resultado = "0,0,0,"+aceleracionX+","+aceleracionY+","+aceleracionZ+","+giroscopioX+","+giroscopioY+","+giroscopioZ+","+magnetometroX+","+magnetometroY+","+magnetometroZ+","+yaw+","+pitch+","+roll+","+barometro+",0;\n"
+                    resultado = "0,0,0,"+aceleracionX+","+aceleracionY+","+aceleracionZ+","+giroscopioX+","+giroscopioY+","+giroscopioZ+","+magnetometroX+","+magnetometroY+","+magnetometroZ+","+yaw+","+pitch+","+roll+","+barometro+",0,0,0,0;\n"
                     fichero.write(resultado)
                 error = 0
-                #print("Correcto enviando IMU")
-                #logging.info('Correcto enviado IMU')
+                print("Correcto enviando IMU")
+                logging.info('Correcto enviado IMU')
                 #print("Solo IMU:")
                 #print(resultado)
             else:
@@ -110,6 +118,8 @@ try:
                 if(error != 1):
                     #logging.error("Error no hay valores ni de la IMU, ni del GPS")
                     error = 1
+                    print("Error no hay valores ni de la IMU ni del GNSS")
+                    logging.error("Error no hay valores ni de la IMU ni del GNSS")
 
 
         else:
@@ -117,6 +127,20 @@ try:
             if(valoresIMU == None):
                 #"ERROR: No hay valores de la IMU.")
                 print("Error no hay valores de la IMU")
+                try:
+                    longitud = str(posicionGPS["longitud"])
+                    latitud = str(posicionGPS["latitud"])
+                    altitud = str(posicionGPS["altitudmetros"])
+                    hdop = str(posicionGPS["HDOP"])
+                    vdop = str(posicionGPS["VDOP"])
+                    pdop = str(posicionGPS["PDOP"])
+                    timeStamp = datetime.datetime.now().strftime("%d-%m-%y %H:%M:%S.%f")
+                    resultado =latitud+","+longitud+","+altitud+",0,0,0,0,0,0,0,0,0,0,0,0,0,"+hdop+","+vdop+","+pdop+","+timeStamp+";\n"
+                    fichero.write(resultado)
+                except KeyError:
+                    print("Error al obtener la informacion de GPS del objecto.")
+                    logging.error('Error al obtener la informacion de GPS del objecto. Mensaje: '+ KeyError.message)
+
                 if(error != 2):
                     logging.error("Error no hay valores de la IMU")
                     error = 2
@@ -139,6 +163,9 @@ try:
                     longitud = str(posicionGPS["longitud"])
                     latitud = str(posicionGPS["latitud"])
                     altitud = str(posicionGPS["altitudmetros"])
+                    hdop = str(posicionGPS["HDOP"])
+                    vdop = str(posicionGPS["VDOP"])
+                    pdop = str(posicionGPS["PDOP"])
                 except KeyError:
                     print("Error al obtener la informacion de GPS y IMU del objecto.")
                     logging.error('Error al obtener la informacion de GPS y IMU del objecto. Mensaje: '+ KeyError.message)
@@ -149,11 +176,11 @@ try:
                 if contador == 100:
                     contador = 0
                     timeStamp = datetime.datetime.now().strftime("%d-%m-%y %H:%M:%S.%f")
-                    resultado =latitud+","+longitud+","+altitud+","+aceleracionX+","+aceleracionY+","+aceleracionZ+","+giroscopioX+","+giroscopioY+","+giroscopioZ+","+magnetometroX+","+magnetometroY+","+magnetometroZ+","+yaw+","+pitch+","+roll+","+barometro+","+timeStamp+";\n"
+                    resultado =latitud+","+longitud+","+altitud+","+aceleracionX+","+aceleracionY+","+aceleracionZ+","+giroscopioX+","+giroscopioY+","+giroscopioZ+","+magnetometroX+","+magnetometroY+","+magnetometroZ+","+yaw+","+pitch+","+roll+","+barometro+","+hdop+","+vdop+","+pdop+","+timeStamp+";\n"
                     fichero.write(resultado)
                 else:
                     contador = contador +1
-                    resultado = latitud+","+longitud+","+altitud+","+aceleracionX+","+aceleracionY+","+aceleracionZ+","+giroscopioX+","+giroscopioY+","+giroscopioZ+","+magnetometroX+","+magnetometroY+","+magnetometroZ+","+yaw+","+pitch+","+roll+","+barometro+",0;\n"
+                    resultado = latitud+","+longitud+","+altitud+","+aceleracionX+","+aceleracionY+","+aceleracionZ+","+giroscopioX+","+giroscopioY+","+giroscopioZ+","+magnetometroX+","+magnetometroY+","+magnetometroZ+","+yaw+","+pitch+","+roll+","+barometro+","+hdop+","+vdop+","+pdop+",0;\n"
                     fichero.write(resultado)
                 print("Correcto enviando IMU y GPS")
                 logging.info('Correcto enviado IMU y GPS')
@@ -165,5 +192,5 @@ try:
             #print("FILTRADO:"+str(posicionGPS))
             #print("FILTRADO:"+str(posicionIMU))
 except Exception:
-    print("Error con el filtrado. Mensaje: "+ Exception.message)
-    logging.error("Error con el filtrado. Mensaje: "+ Exception.message)
+    print("Error con el filtrado. Mensaje: "+ str(Exception.message))
+    logging.error("Error con el filtrado. Mensaje: "+ str(Exception.message))

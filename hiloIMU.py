@@ -754,15 +754,10 @@ leerBajoNivel(ser)
 
 while True:
     try:
-        try:
-            info =leerValores(ser)
-        except KeyboardInterrupt:
-            print("Lectura de la IMU interrumpida.")
-            exit(0)
-    except:
-        print("Error en el hiloIMU.")
-        logging.error("Error en la IMU. Mensaje: ", sys.exc_info()[0])
-
+        info =leerValores(ser)
+    except KeyboardInterrupt:
+        print("Lectura de la IMU interrumpida.")
+        exit(0)
     #print("IMU:")
     #print(info)
     try:
