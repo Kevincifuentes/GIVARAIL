@@ -1,4 +1,5 @@
 import utm
+import datetime
 
 from segmento import Segmento, Nodo
 var = utm.from_latlon(51.2, 7.5)
@@ -19,3 +20,5 @@ s = Segmento(n,n)
 print(s.nodoA.lat)
 
 print(numpy.transpose(a))
+
+print(datetime.datetime.fromtimestamp(1.48575832256e+12/1000.0))

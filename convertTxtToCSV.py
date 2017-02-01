@@ -22,7 +22,7 @@ contador = 1
 with open('excellFormateado.csv', 'wb') as csvfile:
     spamwriter = csv.writer(csvfile, delimiter=',',
                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
-    with open('excell.csv', 'rb') as csvfile:
+    with open('25.csv', 'rb') as csvfile:
      spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
      for row in spamreader:
          stringarray = row[0].split(",")
@@ -30,10 +30,10 @@ with open('excellFormateado.csv', 'wb') as csvfile:
          longitud = stringarray[1]
          if primeraVEZ:
              primeraVEZ = False
-             spamwriter.writerow(['name', latitud, longitud])
+             spamwriter.writerow(['latitude', 'longitude', 'name'])
          else:
              if latitud != '0' and longitud != '0':
-                 spamwriter.writerow(['Prueba'+str(contador), toDoubleLatLong(latitud, "N"), toDoubleLatLong(longitud, "W")])
+                 spamwriter.writerow([toDoubleLatLong(latitud, "N"), toDoubleLatLong(longitud, "W"), 'prueba_250117'])
                  contador = contador + 1
 
 

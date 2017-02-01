@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import serial
+import datetime
 import math
 import atexit
 import redis
@@ -49,8 +50,10 @@ if not ser.isOpen():
 ser.write("\xB5\x62\x06\x00\x14\x00\x01\x00\x00\x00\xD0\x08\x00\x00\x00\xC2")
 ser.write("\x01\x00\x03\x00\x03\x00\x00\x00\x00\x00\xBC\x5E")
 
-#Pone el GPS a la frecuencia de 2hz
-ser.write("\xB5\x62\x06\x08\x06\x00\xF4\x01\x01\x00\x01\x00\x0B\x77")
+#Pone el GNSS a la frecuencia de 2hz
+#ser.write("\xB5\x62\x06\x08\x06\x00\xF4\x01\x01\x00\x01\x00\x0B\x77")
+#Pone el GNSS a la frecuencia de 1hz
+ser.write("\xB5\x62\x06\x08\x06\x00\xE8\x03\x01\x00\x01\x00\x0B\x77")
 ser.readline()
 global fichero
 fichero = open("/media/card/gpsPrueba.txt", "wb")
@@ -58,7 +61,7 @@ primera = True
 
 while True:
     gps = ser.readline()
-    fichero.write(gps)
+    #fichero.write(gps)
     '''
     if (gps.startswith('$GNRMC')):
         if(primera == True):
@@ -95,13 +98,31 @@ while True:
                     if gps.startswith('$GNGSA'):
                         GSA = gps.split(',')
                         break
+                while True:
+                    gps = ser.readline()
+                    if gps.startswith('$GNGST'):
+                        GST = gps.split(',')
+                        break
+                while True:
+                    gps = ser.readline()
+                    if gps.startswith('$GNGBS'):
+                        GBS = gps.split(',')
+                        break
+                standardDevLat = GST[6]
+                standardDevLng = GST[7]
+                standardDevAlt = GST[8]
+                standardDevAlt = standardDevAlt[:standardDevAlt.find("*")]
+                expectedErrorLat = GBS[2]
+                expectedErrorLng = GBS[3]
+                expectedErrorAlt = GBS[4]
                 pdop = GSA[len(GSA)-3]
                 hdop = GSA[len(GSA)-2]
                 vdop = GSA[len(GSA)-1]
                 vdop = vdop[:vdop.find("*")]
-                gps2 = {'latitud':latitud, 'longitud':longitud, "altitudmetros" : altitudMetros, "altitudgrados" : altitudGrados, "HDOP": hdop, "VDOP": vdop, "PDOP" : pdop}
+                gps2 = {'latitud':toDoubleLatLong(latitud, ladoLatitud), 'longitud':toDoubleLatLong(longitud, ladoLongitud), "altitudmetros" : altitudMetros, "altitudgrados" : altitudGrados, "HDOP": hdop, "VDOP": vdop, "PDOP" : pdop, "standardDevLat" : standardDevLat, "standardDevLng" : standardDevLng, "standardDevAlt": standardDevAlt, "expectedErrorLat" : expectedErrorLat, "expectedErrorLng" : expectedErrorLng, "expectedErrorAlt" : expectedErrorAlt}
                 print(json.dumps(gps2))
-                push_element = almacenamientoRedis.lpush('cola_gps', json.dumps(gps2))
+                #print(datetime.datetime.now().strftime("%d-%m-%y %H:%M:%S.%f"))
+                #push_element = almacenamientoRedis.lpush('cola_gps', json.dumps(gps2))
         #print(GGA)
     #Mensaje que nos proporciona el tiempo y fecha
     if(gps.startswith('$GNZDA')):

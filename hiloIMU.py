@@ -15,26 +15,51 @@ from mtdef import MID, OutputMode, OutputSettings, MTException, Baudrates, \
     XDIGroup, getMIDName, DeviceState, DeprecatedMID, MTErrorMessage, \
     MTTimeoutException
 
-global ser
-#logging.basicConfig(filename='logs/hiloIMU.log',format='HiloIMU - %(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
-logging.basicConfig(filename='/media/card/logs/hiloIMU.log',format='HiloIMU - %(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+class ExitHooks(object):
+    def __init__(self):
+        self.exit_code = None
+        self.exception = None
 
-try:
-    ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1, writeTimeout=1)
-except IOError, e:
-    #print("HILOIMU: ERROR >>> AL ABRIR LA COMUNICACION CON LA IMU >>>> "+ str(e))
-    print("Intentando por segunda vez...")
-    ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1,
-                                        writeTimeout=1, rtscts=True,
-                                        dsrdtr=True)
+    def hook(self):
+        self._orig_exit = sys.exit
+        sys.exit = self.exit
+        sys.excepthook = self.exc_handler
+
+    def exit(self, code=0):
+        self.exit_code = code
+        self._orig_exit(code)
+
+    def exc_handler(self, exc_type, exc, *args):
+        self.exception = exc
+
+hooks = ExitHooks()
+hooks.hook()
+
+global almacenamientoRedis
+almacenamientoRedis = redis.StrictRedis(host='localhost', port=6379, db=0)
 
 def finalizar():
+    try:
+        envioBajoNivel(ser, MID.Reset)
+        leerBajoNivel(ser)
+    except Exception:
+        print()
+    ser.close()
+    if hooks.exit_code is not None:
+        print("ERROR: Desechufa la IMU y Reinicia el proceso")
+        logging.error("HiloIMU muerto por Sys.exit(%d)" % hooks.exit_code)
+    elif hooks.exception is not None:
+        print("ERROR: Desechufa la IMU y Reinicia el proceso")
+        logging.error("HiloIMU muerto por Excepcion: %s" % hooks.exception)
+        error = {'error': 'error'}
+        try:
+            almacenamientoRedis.lpush('cola_imu', json.dumps(error))
+        except KeyboardInterrupt:
+            print("Interupcion IMU al enviar error")
+    else:
+        logging.error("Muerte natural")
     print("Fin del HiloIMU")
     logging.info('HILOIMU terminado.')
-    envioBajoNivel(ser, MID.Reset)
-    print(leerBajoNivel(ser))
-    ser.close()
-
 
 def leerValores(ser, mode=OutputMode.Calib, settings=OutputSettings.Coordinates_NED):
         # getting data
@@ -46,9 +71,9 @@ def leerValores(ser, mode=OutputMode.Calib, settings=OutputSettings.Coordinates_
             return parse_MTData2(data)
         else:
             #raise MTException("unknown data message: mid=0x%02X (%s)." %  (mid, getMIDName(mid)))
-            print("error")
+            #print("error")
             envioBajoNivel(ser, MID.GoToMeasurement)
-            print(leerBajoNivel(ser))
+            leerBajoNivel(ser)
 
 def envioBajoNivel(ser, mid, data=b''):
         """Low-level message sending function."""
@@ -111,8 +136,8 @@ def esperando(ser, size=1):
             buf.extend(ser.read(size-len(buf)))
             if len(buf) == size:
                 return buf
-        print "HILOIMU: waiting for %d bytes, got %d so far: [%s]" % \
-                    (size, len(buf), ' '.join('%02X' % v for v in buf))
+        logging.error("HILOIMU: waiting for %d bytes, got %d so far: [%s]" % \
+                    (size, len(buf), ' '.join('%02X' % v for v in buf)))
         raise MTTimeoutException("waiting for message")
 
 def escribirACK(ser, mid, data=b'', n_retries=500):
@@ -690,24 +715,43 @@ def pedirIDDispositivo(ser):
     ser.write('0xFA 0xFF 0x00 0x00 0x01')
 
 
+# INICIO EJECUCION
+
+global ser
+
+#logging.basicConfig(filename='logs/hiloIMU.log',format='HiloIMU - %(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+logging.basicConfig(filename='/media/card/logs/hiloIMU.log',format='HiloIMU - %(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
+
+try:
+    ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1, writeTimeout=1)
+except IOError, e:
+    #print("HILOIMU: ERROR >>> AL ABRIR LA COMUNICACION CON LA IMU >>>> "+ str(e))
+    #print("Intentando por segunda vez...")
+    ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1,
+                                        writeTimeout=1, rtscts=True,
+                                        dsrdtr=True)
 atexit.register(finalizar)
 
-if not ser.isOpen():
-    print("HILOIMU: Unable to open serial port!")
-    logging.error("No es posible abrir el serial para la IMU.")
-    raise SystemExit
+try:
+    if not ser.isOpen():
+        print("HILOIMU: Unable to open serial port!")
+        logging.error("No es posible abrir el serial para la IMU.")
+        raise SystemExit
 
-print("Inicializando IMU...")
-envioBajoNivel(ser, MID.GoToConfig)
-print(leerBajoNivel(ser))
+    print("Inicializando IMU...")
+    envioBajoNivel(ser, MID.GoToConfig)
+    leerBajoNivel(ser)
 
-almacenamientoRedis = redis.StrictRedis(host='localhost', port=6379, db=0)
-output_configuration = get_output_config("oe100fe,bp50,aa100fe,wr100fe,mf100fe")
-data = b''.join(struct.pack('!HH', *output)
-                        for output in output_configuration)
-envioBajoNivel(ser, MID.SetOutputConfiguration, data)
-leerBajoNivel(ser)
-
+    almacenamientoRedis = redis.StrictRedis(host='localhost', port=6379, db=0)
+    output_configuration = get_output_config("oe100fe,bp50,aa100fe,wr100fe,mf100fe")
+    data = b''.join(struct.pack('!HH', *output)
+                            for output in output_configuration)
+    envioBajoNivel(ser, MID.SetOutputConfiguration, data)
+    leerBajoNivel(ser)
+except Exception:
+        print("Error en la lectura de la IMU: desenchufa la IMU")
+        logging.error("Error en la lectura de la IMU: ", sys.exc_info()[0])
+        sys.exit(1)
 '''
 determinarModoOutput(ser, OutputMode.Calib)
 determinarPeriodo(ser, 1152)
@@ -755,9 +799,9 @@ leerBajoNivel(ser)
 while True:
     try:
         info =leerValores(ser)
-    except KeyboardInterrupt:
-        print("Lectura de la IMU interrumpida.")
-        exit(0)
+    except Exception as e:
+        print("Error en la lectura de la IMU: desenchufa la IMU ("+ str(e)+")")
+        logging.error("Error en la lectura de la IMU: "+ str(e))
     #print("IMU:")
     #print(info)
     try:
@@ -777,4 +821,4 @@ while True:
             logging.error("La IMU esta devolviendo NONE.")
     except:
         print("Error en el hiloIMU.")
-        logging.error("Error en la IMU. Mensaje: ", sys.exc_info()[0])
+        logging.error("Error en la IMU.")
