@@ -21,10 +21,10 @@ def toDoubleLatLong(latlon, side):
     return val
 primeraVEZ = True
 contador = 1
-with open('valoresPrueba_240117_175525457130_formatLatLng.csv', 'wb') as csvfile:
+with open('valoresPrueba_250117_071426219163_formatLatLng.csv', 'wb') as csvfile:
     spamwriter = csv.writer(csvfile, delimiter=',',
                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
-    with open('valoresPrueba_240117_175525457130_format.csv', 'rb') as csvfile:
+    with open('valoresPrueba_250117_071426219163_format.csv', 'rb') as csvfile:
      spamreader = csv.reader(csvfile, delimiter=';', quotechar='|')
      for row in spamreader:
          stringarray = row[0].split(",")
