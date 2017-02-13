@@ -1,5 +1,5 @@
 from segmento import Segmento, Nodo
-from mapmaching import puntoApunto, puntoACurva, curvaACurva
+from mapmaching import puntoApunto, puntoApuntoArea, puntoACurva, curvaACurva
 import csv
 import math
 import datetime
@@ -24,7 +24,7 @@ def toDoubleLatLong(latlon, side):
 
 def ejecucionPuntoAPunto(listaPlanimetria, listaMedidas):
 
-    listaSolucion = puntoApunto(listaPlanimetria, listaMedidas)
+    listaSolucion = puntoApuntoArea(listaPlanimetria, listaMedidas, 0.2)
 
     with open('pointtopoint_240117_175525457130_extended.csv', 'wb') as csvfile:
         spamwriter = csv.writer(csvfile, delimiter=',',
@@ -98,7 +98,7 @@ def main():
         listaPlanimetria.append(Nodo(latPlan,lngPlan))
 
 
-    tipo = 2
+    tipo = 1
     if tipo == 1:
         nombreFichero = 'informacionejecucion_puntoapunto.txt'
         file = open(nombreFichero, "w")

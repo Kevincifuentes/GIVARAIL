@@ -1,5 +1,21 @@
 import utm
 import datetime
+import math
+
+def arePointsNear(checkPoint, centerPoint, km):
+    ky = 40000 / 360;
+    kx = math.cos(math.pi * centerPoint[0] / 180.0) * ky;
+    dx = math.fabs(centerPoint[1] - checkPoint[1]) * kx;
+    dy = math.fabs(centerPoint[0] - checkPoint[0]) * ky;
+    return math.sqrt(dx * dx + dy * dy) <= km;
+
+
+vasteras = [43.270126, -2.939200 ];
+stockholm = [43.270142, -2.939343 ];
+
+n = arePointsNear(vasteras, stockholm, 0.05);
+
+print(n)
 
 from segmento import Segmento, Nodo
 var = utm.from_latlon(42.973232, -3.543137)
