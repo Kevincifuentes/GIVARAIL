@@ -22,4 +22,4 @@ print(s.nodoA.lat)
 
 print(numpy.transpose(a))
 
-print(datetime.datetime.fromtimestamp(1.48575832256e+12/1000.0))
+print(datetime.datetime.fromtimestamp(1.48671117865e+12/1000.0))

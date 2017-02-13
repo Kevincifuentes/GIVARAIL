@@ -165,7 +165,7 @@ def puntoACurva(listaPlanimetria, segmentos, listaMedidas):
     return trazaMejorada
 
 
-def curvaACurvaa(listaPlanimetria, segmentos, listaMedidas):
+def curvaACurva(listaPlanimetria, segmentos, listaMedidas):
     """
     Funcion que calcula la traza mejorada utilizando la tecnica curva a curva
     """

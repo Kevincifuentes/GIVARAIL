@@ -1,7 +1,8 @@
 from segmento import Segmento, Nodo
-from mapmaching import puntoApunto, puntoACurva, curvaACurvaa
+from mapmaching import puntoApunto, puntoACurva, curvaACurva
 import csv
 import math
+import datetime
 from xml.dom import minidom
 
 def toDoubleLatLong(latlon, side):
@@ -63,7 +64,7 @@ def ejecucionCurvaACurva(listaPlanimetria, listaMedidas):
             segmentos.append(Segmento(listaPlanimetria[index-1], listaPlanimetria[index]))
         index = index + 1
 
-    listaSolucion = curvaACurvaa(listaPlanimetria, segmentos, listaMedidas)
+    listaSolucion = curvaACurva(listaPlanimetria, segmentos, listaMedidas)
 
     contador = 0
     with open('curvetocurve_240117_175525457130.csv', 'wb') as csvfile:
@@ -97,9 +98,37 @@ def main():
         listaPlanimetria.append(Nodo(latPlan,lngPlan))
 
 
-    ejecucionPuntoAPunto(listaPlanimetria, listaMedidas)
-    #ejecucionPuntoACurva(listaPlanimetria, listaMedidas)
-    #ejecucionCurvaACurva(listaPlanimetria, listaMedidas)
+    tipo = 2
+    if tipo == 1:
+        nombreFichero = 'informacionejecucion_puntoapunto.txt'
+        file = open(nombreFichero, "w")
+        file.write("Tipo: Punto a punto\n")
+        tiempoActual = datetime.datetime.now().strftime("%d%m%y_%H%M%S%f")
+        file.write("Inicio: "+ tiempoActual+"\n")
+        ejecucionPuntoAPunto(listaPlanimetria, listaMedidas)
+        tiempoActual = datetime.datetime.now().strftime("%d%m%y_%H%M%S%f")
+        file.write("Fin: " + tiempoActual+"\n")
+        file.close()
+    elif tipo == 2:
+        nombreFichero = 'informacionejecucion_puntoacurva.txt'
+        file = open(nombreFichero, "w")
+        file.write("Tipo: Punto a curva \n")
+        tiempoActual = datetime.datetime.now().strftime("%d%m%y_%H%M%S%f")
+        file.write("Inicio: " + tiempoActual+"\n")
+        ejecucionPuntoACurva(listaPlanimetria, listaMedidas)
+        tiempoActual = datetime.datetime.now().strftime("%d%m%y_%H%M%S%f")
+        file.write("Fin: " + tiempoActual+"\n")
+        file.close()
+    else:
+        nombreFichero = 'informacionejecucion_curvaacurva.txt'
+        file = open(nombreFichero, "w")
+        file.write("Tipo: Curva a curva\n")
+        tiempoActual = datetime.datetime.now().strftime("%d%m%y_%H%M%S%f")
+        file.write("Inicio: " + tiempoActual+"\n")
+        ejecucionCurvaACurva(listaPlanimetria, listaMedidas)
+        tiempoActual = datetime.datetime.now().strftime("%d%m%y_%H%M%S%f")
+        file.write("Fin: " + tiempoActual+"\n")
+        file.close()
 
 if __name__ == "__main__":
     main()

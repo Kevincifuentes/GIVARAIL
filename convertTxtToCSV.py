@@ -19,10 +19,10 @@ def toDoubleLatLong(latlon, side):
     return val
 primeraVEZ = True
 contador = 1
-with open('excellFormateado.csv', 'wb') as csvfile:
+with open('valoresPrueba_100217_071908825873_Posgresql.csv', 'wb') as csvfile:
     spamwriter = csv.writer(csvfile, delimiter=',',
                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
-    with open('25.csv', 'rb') as csvfile:
+    with open('valoresPrueba_100217_071908825873.csv', 'rb') as csvfile:
      spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
      for row in spamreader:
          stringarray = row[0].split(",")
@@ -33,7 +33,7 @@ with open('excellFormateado.csv', 'wb') as csvfile:
              spamwriter.writerow(['latitude', 'longitude', 'name'])
          else:
              if latitud != '0' and longitud != '0':
-                 spamwriter.writerow([toDoubleLatLong(latitud, "N"), toDoubleLatLong(longitud, "W"), 'prueba_250117'])
+                 spamwriter.writerow([latitud, longitud, 'prueba_100217'])
                  contador = contador + 1
 
 
