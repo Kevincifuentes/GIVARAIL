@@ -7,11 +7,9 @@ import operator
 import sys
 from math import radians, cos, sin, asin, sqrt
 from segmento import Segmento, Nodo
-import numpy
 import utm
 from scipy.spatial import distance as dist
 import numpy
-import cv2
 
 def dentroDeArea(checkPoint, centerPoint, km):
     ky = 40000 / 360;
