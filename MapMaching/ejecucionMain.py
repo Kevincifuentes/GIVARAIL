@@ -1,5 +1,5 @@
 from segmento import Segmento, Nodo
-from mapmaching import puntoApunto, puntoApuntoArea, puntoACurva, curvaACurva
+from mapmaching import puntoApunto, puntoApuntoArea, puntoACurva, puntoACurvaArea, curvaACurva, curvaACurvaArea
 import csv
 import math
 import datetime
@@ -33,8 +33,9 @@ def ejecucionPuntoAPunto(listaPlanimetria, listaMedidas):
         for item in listaSolucion:
             spamwriter.writerow([item.lat, item.lng, 'pointtopoint_extended_240117'])
 
-def ejecucionPuntoACurva(listaPlanimetria, listaMedidas):
+def ejecucionPuntoACurva(listaPlanimetria, listaMedidas, segmentos):
 
+    '''
     segmentos = []
 
     index = 1
@@ -42,20 +43,21 @@ def ejecucionPuntoACurva(listaPlanimetria, listaMedidas):
         if index != len(listaPlanimetria)-1:
             segmentos.append(Segmento(listaPlanimetria[index-1], listaPlanimetria[index]))
         index = index + 1
+    '''
 
-    listaSolucion = puntoACurva(listaPlanimetria, segmentos, listaMedidas)
+    listaSolucion = puntoACurvaArea(listaPlanimetria, segmentos, listaMedidas, 0.2)
 
     contador = 0
-    with open('pointtocurve_240117_175525457130.csv', 'wb') as csvfile:
+    with open('pointtocurve_240117_175525457130_extended.csv', 'wb') as csvfile:
         spamwriter = csv.writer(csvfile, delimiter=',',
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
         spamwriter.writerow(['latitude', 'longitude', 'name'])
         for item in listaSolucion:
-            spamwriter.writerow([item.lat, item.lng, 'pointtocurve_240117'])
+            spamwriter.writerow([item.lat, item.lng, 'pointtocurve_extended_240117'])
             contador = contador + 1
 
-def ejecucionCurvaACurva(listaPlanimetria, listaMedidas):
-
+def ejecucionCurvaACurva(listaPlanimetria, listaMedidas, segmentos):
+    '''
     segmentos = []
 
     index = 1
@@ -63,21 +65,22 @@ def ejecucionCurvaACurva(listaPlanimetria, listaMedidas):
         if index != len(listaPlanimetria)-1:
             segmentos.append(Segmento(listaPlanimetria[index-1], listaPlanimetria[index]))
         index = index + 1
-
-    listaSolucion = curvaACurva(listaPlanimetria, segmentos, listaMedidas)
+    '''
+    listaSolucion = curvaACurvaArea(listaPlanimetria, segmentos, listaMedidas, 0.2)
 
     contador = 0
-    with open('curvetocurve_240117_175525457130.csv', 'wb') as csvfile:
+    with open('curvetocurve_240117_175525457130_extended.csv', 'wb') as csvfile:
         spamwriter = csv.writer(csvfile, delimiter=',',
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
         spamwriter.writerow(['latitude', 'longitude', 'name'])
         for item in listaSolucion:
-            spamwriter.writerow([item.lat, item.lng, 'curvetocurve_240117'])
+            spamwriter.writerow([item.lat, item.lng, 'curvetocurve_extended_240117'])
             contador = contador + 1
 
 
 #INICIO
-def main():
+def main(opcion=1):
+    print("Opcion: "+ str(opcion))
     listaMedidas = []
 
     with open('valoresPrueba_240117_175525457130_formatLatLng.csv', 'rb') as csvfile:
@@ -90,15 +93,22 @@ def main():
                 listaMedidas.append(Nodo(latitud, longitud))
 
     xmldoc = minidom.parse('240117_Planimetria_extendida.gpx')
-    itemlist = xmldoc.getElementsByTagName('trkpt')
+    itemlist = xmldoc.getElementsByTagName('trkseg')
     listaPlanimetria = []
-    for trkpt in itemlist:
-        latPlan = float(trkpt.attributes['lat'].value)
-        lngPlan = float(trkpt.attributes['lon'].value)
-        listaPlanimetria.append(Nodo(latPlan,lngPlan))
+    segmentos = []
+    index = 0
+    for trseg in itemlist:
+        alist=trseg.getElementsByTagName('trkpt')
+        for trkpt in alist:
+            latPlan = float(trkpt.attributes['lat'].value)
+            lngPlan = float(trkpt.attributes['lon'].value)
+            listaPlanimetria.append(Nodo(latPlan,lngPlan))
+            if index != 0:
+                segmentos.append(Segmento(listaPlanimetria[index-1], listaPlanimetria[index]))
+            index = index + 1
 
-
-    tipo = 1
+    print(len(segmentos))
+    tipo = opcion
     if tipo == 1:
         nombreFichero = 'informacionejecucion_puntoapunto.txt'
         file = open(nombreFichero, "w")
@@ -115,7 +125,7 @@ def main():
         file.write("Tipo: Punto a curva \n")
         tiempoActual = datetime.datetime.now().strftime("%d%m%y_%H%M%S%f")
         file.write("Inicio: " + tiempoActual+"\n")
-        ejecucionPuntoACurva(listaPlanimetria, listaMedidas)
+        ejecucionPuntoACurva(listaPlanimetria, listaMedidas, segmentos)
         tiempoActual = datetime.datetime.now().strftime("%d%m%y_%H%M%S%f")
         file.write("Fin: " + tiempoActual+"\n")
         file.close()
@@ -125,10 +135,10 @@ def main():
         file.write("Tipo: Curva a curva\n")
         tiempoActual = datetime.datetime.now().strftime("%d%m%y_%H%M%S%f")
         file.write("Inicio: " + tiempoActual+"\n")
-        ejecucionCurvaACurva(listaPlanimetria, listaMedidas)
+        ejecucionCurvaACurva(listaPlanimetria, listaMedidas, segmentos)
         tiempoActual = datetime.datetime.now().strftime("%d%m%y_%H%M%S%f")
         file.write("Fin: " + tiempoActual+"\n")
         file.close()
 
 if __name__ == "__main__":
-    main()
+    main(3)

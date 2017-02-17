@@ -53,7 +53,7 @@ ser.baudrate = 115200
 ser.port = '/dev/ttyACM0'
 
 global almacenamientoRedis
-almacenamientoRedis = redis.StrictRedis(host='localhost', port=6379, db=0)
+almacenamientoRedis = redis.StrictRedis(host='127.0.0.1', port=6379, db=0)
 
 def toFloat(value):
     val = None

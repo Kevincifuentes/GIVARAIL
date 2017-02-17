@@ -36,7 +36,7 @@ hooks = ExitHooks()
 hooks.hook()
 
 global almacenamientoRedis
-almacenamientoRedis = redis.StrictRedis(host='localhost', port=6379, db=0)
+almacenamientoRedis = redis.StrictRedis(host='127.0.0.1', port=6379, db=0)
 
 def procesoExtra():
     variable = 10
@@ -105,7 +105,7 @@ global nombreFichero
 nombreFichero = '/media/card/valoresPrueba_'+ tiempoActual +'.csv'
 global fichero
 fichero = open(nombreFichero, "wb")
-contador = 0;
+contador = 0
 error = 0
 try:
     while(True):
