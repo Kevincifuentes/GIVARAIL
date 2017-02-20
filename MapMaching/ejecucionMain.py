@@ -22,18 +22,18 @@ def toDoubleLatLong(latlon, side):
         val = None
     return val
 
-def ejecucionPuntoAPunto(listaPlanimetria, listaMedidas):
+def ejecucionPuntoAPunto(listaPlanimetria, listaMedidas, output):
 
     listaSolucion = puntoApuntoArea(listaPlanimetria, listaMedidas, 0.2)
 
-    with open('pointtopoint_240117_175525457130_extended.csv', 'wb') as csvfile:
+    with open('pointtopoint_'+output+'.csv', 'wb') as csvfile:
         spamwriter = csv.writer(csvfile, delimiter=',',
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
         spamwriter.writerow(['latitude', 'longitude', 'name'])
         for item in listaSolucion:
             spamwriter.writerow([item.lat, item.lng, 'pointtopoint_extended_240117'])
 
-def ejecucionPuntoACurva(listaPlanimetria, listaMedidas, segmentos):
+def ejecucionPuntoACurva(listaPlanimetria, listaMedidas, segmentos, output):
 
     '''
     segmentos = []
@@ -48,7 +48,7 @@ def ejecucionPuntoACurva(listaPlanimetria, listaMedidas, segmentos):
     listaSolucion = puntoACurvaArea(listaPlanimetria, segmentos, listaMedidas, 0.2)
 
     contador = 0
-    with open('pointtocurve_240117_175525457130_extended.csv', 'wb') as csvfile:
+    with open('pointtocurve_'+output+'.csv', 'wb') as csvfile:
         spamwriter = csv.writer(csvfile, delimiter=',',
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
         spamwriter.writerow(['latitude', 'longitude', 'name'])
@@ -56,7 +56,7 @@ def ejecucionPuntoACurva(listaPlanimetria, listaMedidas, segmentos):
             spamwriter.writerow([item.lat, item.lng, 'pointtocurve_extended_240117'])
             contador = contador + 1
 
-def ejecucionCurvaACurva(listaPlanimetria, listaMedidas, segmentos):
+def ejecucionCurvaACurva(listaPlanimetria, listaMedidas, segmentos, output):
     '''
     segmentos = []
 
@@ -69,7 +69,7 @@ def ejecucionCurvaACurva(listaPlanimetria, listaMedidas, segmentos):
     listaSolucion = curvaACurvaArea(listaPlanimetria, segmentos, listaMedidas, 0.2)
 
     contador = 0
-    with open('curvetocurve_240117_175525457130_extended.csv', 'wb') as csvfile:
+    with open('curvetocurve_'+output+'.csv', 'wb') as csvfile:
         spamwriter = csv.writer(csvfile, delimiter=',',
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
         spamwriter.writerow(['latitude', 'longitude', 'name'])
@@ -79,11 +79,11 @@ def ejecucionCurvaACurva(listaPlanimetria, listaMedidas, segmentos):
 
 
 #INICIO
-def main(opcion=1):
+def main(opcion=1, input='valoresPrueba_240117_175525457130_formatLatLng.csv', output='_240117_175525457130'):
     print("Opcion: "+ str(opcion))
     listaMedidas = []
 
-    with open('valoresPrueba_240117_175525457130_formatLatLng.csv', 'rb') as csvfile:
+    with open(input, 'rb') as csvfile:
          spamreader = csv.reader(csvfile, delimiter=';', quotechar='|')
          for row in spamreader:
              stringarray = row[0].split(",")
@@ -110,32 +110,32 @@ def main(opcion=1):
     print(len(segmentos))
     tipo = opcion
     if tipo == 1:
-        nombreFichero = 'informacionejecucion_puntoapunto.txt'
+        nombreFichero = 'informacionejecucion_puntoapunto_'+ output + ".txt"
         file = open(nombreFichero, "w")
         file.write("Tipo: Punto a punto\n")
         tiempoActual = datetime.datetime.now().strftime("%d%m%y_%H%M%S%f")
         file.write("Inicio: "+ tiempoActual+"\n")
-        ejecucionPuntoAPunto(listaPlanimetria, listaMedidas)
+        ejecucionPuntoAPunto(listaPlanimetria, listaMedidas, output)
         tiempoActual = datetime.datetime.now().strftime("%d%m%y_%H%M%S%f")
         file.write("Fin: " + tiempoActual+"\n")
         file.close()
     elif tipo == 2:
-        nombreFichero = 'informacionejecucion_puntoacurva.txt'
+        nombreFichero = 'informacionejecucion_puntoacurva_'+ output + ".txt"
         file = open(nombreFichero, "w")
         file.write("Tipo: Punto a curva \n")
         tiempoActual = datetime.datetime.now().strftime("%d%m%y_%H%M%S%f")
         file.write("Inicio: " + tiempoActual+"\n")
-        ejecucionPuntoACurva(listaPlanimetria, listaMedidas, segmentos)
+        ejecucionPuntoACurva(listaPlanimetria, listaMedidas, segmentos, output)
         tiempoActual = datetime.datetime.now().strftime("%d%m%y_%H%M%S%f")
         file.write("Fin: " + tiempoActual+"\n")
         file.close()
     else:
-        nombreFichero = 'informacionejecucion_curvaacurva.txt'
+        nombreFichero = 'informacionejecucion_curvaacurva_'+ output + ".txt"
         file = open(nombreFichero, "w")
         file.write("Tipo: Curva a curva\n")
         tiempoActual = datetime.datetime.now().strftime("%d%m%y_%H%M%S%f")
         file.write("Inicio: " + tiempoActual+"\n")
-        ejecucionCurvaACurva(listaPlanimetria, listaMedidas, segmentos)
+        ejecucionCurvaACurva(listaPlanimetria, listaMedidas, segmentos, output)
         tiempoActual = datetime.datetime.now().strftime("%d%m%y_%H%M%S%f")
         file.write("Fin: " + tiempoActual+"\n")
         file.close()
