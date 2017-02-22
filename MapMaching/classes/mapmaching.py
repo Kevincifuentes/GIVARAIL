@@ -431,15 +431,19 @@ def curvaACurvaArea(listaPlanimetria, segmentos, listaMedidas, km):
 
         listaPlanimetriaEnArea = []
         #Miro los nodos que estén en el area de alrededor (radio de 50 metros)
-        for nodoPlano in listaPlanimetria:
+        '''for nodoPlano in listaPlanimetria:
             if dentroDeArea(nodoPlano, nodo, km) == True:
-                listaPlanimetriaEnArea.append(nodoPlano)
+                listaPlanimetriaEnArea.append(nodoPlano)'''
 
         #Miramos los segmentos que estén dentro del area
         listaSegmentosArea = []
         for segmento in segmentos:
-            if dentroDeArea(segmento.nodoA, nodo, km) == True and dentroDeArea(segmento.nodoB, nodo, km) == True:
+            if dentroDeArea(segmento.nodoA, nodo, km) == True or dentroDeArea(segmento.nodoB, nodo, km) == True:
                 listaSegmentosArea.append(segmento)
+                if segmento.nodoA not in listaPlanimetriaEnArea:
+                    listaPlanimetriaEnArea.append(segmento.nodoA)
+                if segmento.nodoB not in listaPlanimetriaEnArea:
+                    listaPlanimetriaEnArea.append(segmento.nodoB)
 
         dist = []
         for nodoPlano in listaPlanimetriaEnArea:
