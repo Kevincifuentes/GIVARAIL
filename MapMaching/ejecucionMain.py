@@ -31,7 +31,7 @@ def ejecucionPuntoAPunto(listaPlanimetria, listaMedidas, output):
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
         spamwriter.writerow(['latitude', 'longitude', 'name'])
         for item in listaSolucion:
-            spamwriter.writerow([item.lat, item.lng, 'pointtopoint_extended_240117'])
+            spamwriter.writerow([item.lat, item.lng, 'pointtopoint'+output])
 
 def ejecucionPuntoACurva(listaPlanimetria, listaMedidas, segmentos, output):
 
@@ -53,7 +53,7 @@ def ejecucionPuntoACurva(listaPlanimetria, listaMedidas, segmentos, output):
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
         spamwriter.writerow(['latitude', 'longitude', 'name'])
         for item in listaSolucion:
-            spamwriter.writerow([item.lat, item.lng, 'pointtocurve_extended_240117'])
+            spamwriter.writerow([item.lat, item.lng, 'pointtocurve'+output])
             contador = contador + 1
 
 def ejecucionCurvaACurva(listaPlanimetria, listaMedidas, segmentos, output):
@@ -74,7 +74,7 @@ def ejecucionCurvaACurva(listaPlanimetria, listaMedidas, segmentos, output):
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
         spamwriter.writerow(['latitude', 'longitude', 'name'])
         for item in listaSolucion:
-            spamwriter.writerow([item.lat, item.lng, 'curvetocurve_extended_240117'])
+            spamwriter.writerow([item.lat, item.lng, 'curvetocurve'+output])
             contador = contador + 1
 
 
