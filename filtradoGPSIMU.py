@@ -107,6 +107,21 @@ global fichero
 fichero = open(nombreFichero, "wb")
 contador = 0
 error = 0
+
+global aceleracionX
+global aceleracionY
+global aceleracionZ
+global giroscopioX
+global giroscopioY
+global giroscopioZ
+global magnetometroX
+global magnetometroY
+global magnetometroZ
+global yaw
+global pitch
+global roll
+global barometro
+
 try:
     while(True):
         valoresIMU = almacenamientoRedis.rpop('cola_imu')
@@ -205,7 +220,7 @@ try:
                     #timeStamp = datetime.datetime.now().strftime("%d-%m-%y %H:%M:%S.%f")
                     then = datetime.datetime.now()
                     timeStamp = str(time.mktime(then.timetuple())*1e3 + then.microsecond/1e3)
-                    resultado =latitud+","+longitud+","+altitud+",0,0,0,0,0,0,0,0,0,0,0,0,0,"+hdop+","+vdop+","+pdop+","+standardDevLat+","+standardDevLng+","+standardDevAlt+","+expectedErrorLat+","+expectedErrorLng+","+expectedErrorAlt+","+timeStamp+"\n"
+                    resultado =latitud+","+longitud+","+altitud+","+aceleracionX+","+aceleracionY+","+aceleracionZ+","+giroscopioX+","+giroscopioY+","+giroscopioZ+","+magnetometroX+","+magnetometroY+","+magnetometroZ+","+roll+","+pitch+","+yaw+","+barometro+","+hdop+","+vdop+","+pdop+","+standardDevLat+","+standardDevLng+","+standardDevAlt+","+expectedErrorLat+","+expectedErrorLng+","+expectedErrorAlt+","+timeStamp+"\n"
                     fichero.write(resultado)
                 except KeyError:
                     print("Error al obtener la informacion de GPS del objecto.")

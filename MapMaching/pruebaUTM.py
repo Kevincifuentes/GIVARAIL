@@ -39,3 +39,8 @@ print(s.nodoA.lat)
 print(numpy.transpose(a))
 
 print(datetime.datetime.fromtimestamp(1.48671117865e+12/1000.0))
+
+
+x = numpy.array([[2,2,2], [2,2,2],[2,2,2]])
+
+print(numpy.diag((0.01*math.pow(0.01,2)/2)*numpy.ones((1,3), numpy.float)))
