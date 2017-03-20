@@ -62,14 +62,11 @@ def EKF(y_k,P_k,F_k,Q_k,z_k,H_k,R_k):
     y_k = F_k*y_k
 
     P_k = F_k*P_k*numpy.transpose(F_k)+Q_k
-    #print(P_k*numpy.transpose(H_k)*numpy.linalg.matrix_power(H_k*P_k*numpy.transpose(H_k)+R_k, -1))
-    #print(numpy.dot(P_k, numpy.dot(numpy.transpose(H_k),numpy.linalg.inv(numpy.dot(H_k, numpy.dot(P_k, numpy.transpose(H_k)))+R_k))))
+    #print(numpy.linalg.inv(H_k*P_k*numpy.transpose(H_k)+R_k))
     K = P_k*numpy.transpose(H_k)*numpy.linalg.inv(H_k*P_k*numpy.transpose(H_k)+R_k)
     #print(K)
     y_k = y_k+K*(z_k-H_k*y_k)
-    #print(y_k)
     P_k=(numpy.identity(len(y_k))-K*H_k)*P_k
-    #print(P_k)
 
     return y_k,P_k
 
@@ -188,7 +185,7 @@ def fuseIMU_GPS():
 
     Q = numpy.diag([0.0000018, 0.0000018, 0.0000018, 0, 0, 0, 0, 0, 0, 0.00003, 0.00003, 0.00003, 0, 0, 0])
 
-    R = numpy.diag([10000, 10000, 10000, 10000])
+    R = numpy.diag([10000, 10000, 10000, 10000]).astype(numpy.float64)
 
     m2 = numpy.zeros((4,4))
 
@@ -336,7 +333,7 @@ def fuseIMU_GPS():
                 #Covarianza
                 R[0:3,0:3] = numpy.identity(3)*10000
 
-#*[1 0 0; 0 cos(roll) sin(roll); 0 -sin(roll) cos(roll)]*b_b(current,:)';
+            #*[1 0 0; 0 cos(roll) sin(roll); 0 -sin(roll) cos(roll)]*b_b(current,:)';
             #Datos del magnetometro
            # b_n = numpy.matrix([[m.cos(eul[1]), 0, -m.sin(eul[1])],
            #        [0,1,0],
@@ -350,7 +347,6 @@ def fuseIMU_GPS():
             ##EKF con el vector de errores en medidas y la matriz Jacobiana (H)
 
             [dx, P] = EKF(dx,P,F,Q,m2,H,R)
-
             a_b[0:seconds_index-1,:] = a_b[1:seconds_index,:]
             w_b[0:seconds_index-1,:] = w_b[1:seconds_index,:]
             b_b[0:seconds_index-1,:] = b_b[1:seconds_index,:]

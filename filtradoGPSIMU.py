@@ -13,6 +13,7 @@ import sys
 import logging
 import signal
 import sys
+import mapmaching
 import numpy as np
 
 class ExitHooks(object):
@@ -280,7 +281,10 @@ try:
                     logging.error('Error al obtener la informacion de GPS y IMU del objecto. Mensaje: '+ KeyError.message)
 
 
-                procesoExtra()
+                ## TODO: REALIZAR FILTRADO EKF/UKF
+
+                ## Mapmatching
+
                 resultado = ""
                 #timeStamp = datetime.datetime.now().strftime("%d-%m-%y %H:%M:%S.%f")
                 then = datetime.datetime.now()
@@ -300,3 +304,4 @@ except KeyboardInterrupt:
     print("Error con el filtrado.")
     logging.error("Error con el filtrado.")
     sys.exit(1)
+
