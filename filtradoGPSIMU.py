@@ -13,7 +13,6 @@ import sys
 import logging
 import signal
 import sys
-import mapmaching
 import numpy as np
 
 class ExitHooks(object):
@@ -74,8 +73,8 @@ def cleanup():
         logging.error("filtradoGPSIMU muerto por Excepcion: %s" % hooks.exception)
      else:
         logging.error("Muerte natural")
-     subprocess.Popen([sys.executable, 'limpiarColaGPS.py', '--username', 'root'])
-     subprocess.Popen([sys.executable, 'limpiarColaIMU.py', '--username', 'root'])
+     subprocess.Popen([sys.executable, '/GIVARAIL/limpiarColaGPS.py', '--username', 'root'])
+     subprocess.Popen([sys.executable, '/GIVARAIL/limpiarColaIMU.py', '--username', 'root'])
 
      if hooks.exit_code is not None:
         print("filtradoGPSIMU muerto por Sys.exit(%d)" % hooks.exit_code)
@@ -88,8 +87,8 @@ def cleanup():
 
 #logging.basicConfig(filename='logs/logFiltradoGPSIMU.log',format='FiltradoGPSIMU - %(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 logging.basicConfig(filename='/media/card/logs/logFiltradoGPSIMU.log',format='FiltradoGPSIMU - %(asctime)s - %(levelname)s - %(message)s', level=logging.DEBUG)
-hiloGPS = subprocess.Popen([sys.executable, 'hiloGPS.py', '--username', 'root'])
-hiloIMU = subprocess.Popen([sys.executable, 'hiloIMU.py', '--username', 'root'])
+hiloGPS = subprocess.Popen([sys.executable, '/GIVARAIL/hiloGPS.py', '--username', 'root'])
+hiloIMU = subprocess.Popen([sys.executable, '/GIVARAIL/hiloIMU.py', '--username', 'root'])
 #time.sleep(15)
 
 #Variables

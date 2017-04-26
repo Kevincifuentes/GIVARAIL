@@ -311,7 +311,7 @@ def main():
                         listares = puntoApuntoArea(listaPlanimetria, [Nodo(latitud,longitud)], 0.2)
                     elif tipo == 1:
                         listares = puntoACurvaArea(listaPlanimetria, segmentos, [Nodo(latitud,longitud)], 0.2)
-                    else:
+                    elif tipo == 2:
                         listares = curvaACurvaArea(listaPlanimetria, segmentos, [Nodo(latitud,longitud)], 0.2)
 
                     latitud = listares.lat;
