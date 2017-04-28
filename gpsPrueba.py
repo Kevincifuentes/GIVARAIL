@@ -55,7 +55,7 @@ ser.write("\x01\x00\x03\x00\x03\x00\x00\x00\x00\x00\xBC\x5E")
 #Pone el GNSS a la frecuencia de 1hz
 ser.write("\xB5\x62\x06\x08\x06\x00\xE8\x03\x01\x00\x01\x00\x0B\x77")
 ser.readline()
-global fichero
+global ficheroDatos
 #fichero = open("/media/card/gpsPrueba.txt", "wb")
 primera = True
 

@@ -639,11 +639,11 @@ determinarSkipFactor(ser, 0)
 #print("HILOIMU: ------------------------------------")
 envioBajoNivel(ser, MID.GoToMeasurement)
 mid, data = leerBajoNivel(ser)
-global fichero
+global ficheroDatos
 nombreFichero = '/media/card/imu_datosprueba.txt'
-fichero = open(nombreFichero, "wb")
+ficheroDatos = open(nombreFichero, "wb")
 
 while True:
     info =leerValores(ser)
     #unpacked_images = json.loads(r.get('images'))
-    fichero.write(json.dumps(info)+"\n")
+    ficheroDatos.write(json.dumps(info) + "\n")

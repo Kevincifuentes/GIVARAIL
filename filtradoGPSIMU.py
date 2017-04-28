@@ -38,6 +38,23 @@ hooks.hook()
 global almacenamientoRedis
 almacenamientoRedis = redis.StrictRedis(host='127.0.0.1', port=6379, db=0)
 
+def toDoubleLatLong(latlon, side):
+    val = None
+    try:
+        tmp = float(latlon)
+        tmp /= 100
+        val = math.floor(tmp)
+        tmp = (tmp - val) * 100
+        val += tmp/60
+        tmp -= math.floor(tmp)
+        tmp *= 60
+        if ((side.upper() == "S") or (side.upper()=="W")):
+            val *= -1
+    except ValueError:
+        print("Can't calculate from {0} side {1}".format(latlon, side))
+        val = None
+    return val
+
 def procesoExtra():
     variable = 10
     i = 0
@@ -47,8 +64,8 @@ def procesoExtra():
 
 def cleanup():
      #Para eliminar la ultima linea, dado que suele estar medio-escrita
-     fichero.write("")
-     fichero.close()
+     ficheroDatos.write("")
+     ficheroDatos.close()
      try:
          f = open(nombreFichero, "r+")
          f.seek(-len(os.linesep), os.SEEK_END)
@@ -103,8 +120,8 @@ atexit.register(cleanup)
 tiempoActual = datetime.datetime.now().strftime("%d%m%y_%H%M%S%f")
 global nombreFichero
 nombreFichero = '/media/card/valoresPrueba_'+ tiempoActual +'.csv'
-global fichero
-fichero = open(nombreFichero, "wb")
+global ficheroDatos
+ficheroDatos = open(nombreFichero, "wb")
 contador = 0
 error = 0
 
@@ -172,11 +189,11 @@ try:
                     then = datetime.datetime.now()
                     timeStamp = str(time.mktime(then.timetuple())*1e3 + then.microsecond/1e3)
                     resultado ="0,0,0,"+aceleracionX+","+aceleracionY+","+aceleracionZ+","+giroscopioX+","+giroscopioY+","+giroscopioZ+","+magnetometroX+","+magnetometroY+","+magnetometroZ+","+roll+","+pitch+","+yaw+","+barometro+",0,0,0,0,0,0,0,0,0,"+timeStamp+"\n"
-                    fichero.write(resultado)
+                    ficheroDatos.write(resultado)
                 else:
                     contador = contador +1
                     resultado = "0,0,0,"+aceleracionX+","+aceleracionY+","+aceleracionZ+","+giroscopioX+","+giroscopioY+","+giroscopioZ+","+magnetometroX+","+magnetometroY+","+magnetometroZ+","+roll+","+pitch+","+yaw+","+barometro+",0,0,0,0,0,0,0,0,0,0\n"
-                    fichero.write(resultado)
+                    ficheroDatos.write(resultado)
                 error = 0
                 #print("Correcto enviando IMU")
                 logging.info('Correcto enviado IMU')
@@ -221,7 +238,7 @@ try:
                     then = datetime.datetime.now()
                     timeStamp = str(time.mktime(then.timetuple())*1e3 + then.microsecond/1e3)
                     resultado =latitud+","+longitud+","+altitud+","+aceleracionX+","+aceleracionY+","+aceleracionZ+","+giroscopioX+","+giroscopioY+","+giroscopioZ+","+magnetometroX+","+magnetometroY+","+magnetometroZ+","+roll+","+pitch+","+yaw+","+barometro+","+hdop+","+vdop+","+pdop+","+standardDevLat+","+standardDevLng+","+standardDevAlt+","+expectedErrorLat+","+expectedErrorLng+","+expectedErrorAlt+","+timeStamp+"\n"
-                    fichero.write(resultado)
+                    ficheroDatos.write(resultado)
                 except KeyError:
                     print("Error al obtener la informacion de GPS del objecto.")
                     logging.error('Error al obtener la informacion de GPS del objecto. Mensaje: '+ KeyError.message)
@@ -288,8 +305,10 @@ try:
                 #timeStamp = datetime.datetime.now().strftime("%d-%m-%y %H:%M:%S.%f")
                 then = datetime.datetime.now()
                 timeStamp = str(time.mktime(then.timetuple())*1e3 + then.microsecond/1e3)
+                latitud = toDoubleLatLong(latitud, "N")
+                longitud = toDoubleLatLong(longitud, "W")
                 resultado =latitud+","+longitud+","+altitud+","+aceleracionX+","+aceleracionY+","+aceleracionZ+","+giroscopioX+","+giroscopioY+","+giroscopioZ+","+magnetometroX+","+magnetometroY+","+magnetometroZ+","+roll+","+pitch+","+yaw+","+barometro+","+hdop+","+vdop+","+pdop+","+standardDevLat+","+standardDevLng+","+standardDevAlt+","+expectedErrorLat+","+expectedErrorLng+","+expectedErrorAlt+","+timeStamp+"\n"
-                fichero.write(resultado)
+                ficheroDatos.write(resultado)
                 print("Correcto enviando IMU y GPS")
                 logging.info('Correcto enviado IMU y GPS')
                 error = 0

@@ -7,6 +7,7 @@ import atexit
 import redis
 import logging
 import json
+import subprocess
 
 class ExitHooks(object):
     def __init__(self):
@@ -81,6 +82,7 @@ def finalizar():
     else:
         logging.error("Muerte natural")
     print("Fin del HiloGPS")
+    subprocess.Popen([sys.executable, '/GIVARAIL/limpiarColaGPS.py', '--username', 'root'])
     logging.info('HILOGPS terminado.')
 
 atexit.register(finalizar)
@@ -108,7 +110,7 @@ ser.write("\xB5\x62\x06\x1A\x28\x00\x03\x00\x00\x00\x03\x04\x10\x02")
 ser.write("\x50\xC3\x00\x00\x18\x14\x05\x3C\x00\x03\x00\x00\xFA\x00\xFA\x00\x64\x00\x2C\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x6C\x95")
 ser.readline()
 primera = True
-global fichero
+global ficheroDatos
 while True:
     try:
         gps = ser.readline()

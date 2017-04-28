@@ -10,6 +10,7 @@ import logging
 import time
 import struct
 import atexit
+import subprocess
 
 from mtdef import MID, OutputMode, OutputSettings, MTException, Baudrates, \
     XDIGroup, getMIDName, DeviceState, DeprecatedMID, MTErrorMessage, \
@@ -59,6 +60,7 @@ def finalizar():
     else:
         logging.error("Muerte natural")
     print("Fin del HiloIMU")
+    subprocess.Popen([sys.executable, '/GIVARAIL/limpiarColaIMU.py', '--username', 'root'])
     logging.info('HILOIMU terminado.')
 
 def leerValores(ser, mode=OutputMode.Calib, settings=OutputSettings.Coordinates_NED):
